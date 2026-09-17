@@ -1,33 +1,32 @@
-import { lazy } from 'react'
 import { Route, Routes } from 'react-router'
 import { RootLayout } from '@/components/layout/RootLayout'
+import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
 import HomePage from '@/routes/HomePage'
+import { pages } from '@/routes/pages'
 
 // Home is bundled with the shell because it is the most visited URL; every other page
-// is its own chunk, loaded when the visitor navigates there.
-const AboutPage = lazy(() => import('@/routes/AboutPage'))
-const ServicesPage = lazy(() => import('@/routes/ServicesPage'))
-const TeamPage = lazy(() => import('@/routes/TeamPage'))
-const BlogListPage = lazy(() => import('@/routes/BlogListPage'))
-const BlogDetailPage = lazy(() => import('@/routes/BlogDetailPage'))
-const CreateBlogPage = lazy(() => import('@/routes/CreateBlogPage'))
-const LoginPage = lazy(() => import('@/routes/LoginPage'))
-const NotFoundPage = lazy(() => import('@/routes/NotFoundPage'))
-
+// is its own chunk (see routes/pages.ts), loaded when the visitor navigates there.
 export default function App() {
   return (
     <Routes>
       <Route element={<RootLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="about" element={<AboutPage />} />
-        <Route path="services" element={<ServicesPage />} />
-        <Route path="teams" element={<TeamPage />} />
-        <Route path="blog" element={<BlogListPage />} />
+        <Route path="about" element={<pages.about />} />
+        <Route path="services" element={<pages.services />} />
+        <Route path="teams" element={<pages.teams />} />
+        <Route path="blog" element={<pages.blogList />} />
         {/* Static segment wins over the :slug pattern in react-router's ranking. */}
-        <Route path="blog/new" element={<CreateBlogPage />} />
-        <Route path="blog/:slug" element={<BlogDetailPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path="blog/new"
+          element={
+            <ProtectedRoute>
+              <pages.createBlog />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="blog/:slug" element={<pages.blogDetail />} />
+        <Route path="login" element={<pages.login />} />
+        <Route path="*" element={<pages.notFound />} />
       </Route>
     </Routes>
   )

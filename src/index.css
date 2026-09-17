@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "./styles/fonts.css";
 @import "./styles/theme.css";
+@import "./styles/markdown.css";
 
 /* Class-based dark mode; the class is set before first paint by the script in index.html. */
 @custom-variant dark (&:is(.dark *));

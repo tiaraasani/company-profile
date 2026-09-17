@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 /**
  * Small async-resource store used by the data pages (team, blog).
  * - Entries live in memory and, optionally, in sessionStorage so navigating back is instant.
- * - Reads go through useSyncExternalStore with a "loading" server snapshot, which keeps the
- *   prerendered skeleton markup identical during hydration even when a cached copy exists.
+ * - Reads go through useSyncExternalStore. The server snapshot is "loading" unless the
+ *   resource was primed (build-time prerender embeds the data as JSON, and main.tsx primes
+ *   it again before hydrating), so server and client always render the same markup.
  * - Fetching happens in an effect and writes back into the store (no setState in effects).
  */
 export type ResourceStatus = 'loading' | 'success' | 'error'
@@ -18,7 +19,23 @@ export interface ResourceEntry<T> {
 const LOADING: ResourceEntry<never> = { status: 'loading', data: null, error: null }
 
 const entries = new Map<string, ResourceEntry<unknown>>()
+const primed = new Map<string, ResourceEntry<unknown>>()
 const listeners = new Map<string, Set<() => void>>()
+
+/** Seeds resources with data that was fetched at build time. */
+export function primeResources(resources: Record<string, unknown>) {
+  for (const [key, data] of Object.entries(resources)) {
+    const entry: ResourceEntry<unknown> = { status: 'success', data, error: null }
+    primed.set(key, entry)
+    entries.set(key, entry)
+  }
+}
+
+/** Server only: forget everything between two prerendered pages. */
+export function resetResources() {
+  primed.clear()
+  entries.clear()
+}
 
 function readSession<T>(key: string): T | null {
   try {
@@ -51,6 +68,7 @@ function getEntry<T>(key: string, cache: boolean): ResourceEntry<T> {
 
 function setEntry<T>(key: string, entry: ResourceEntry<T>, cache: boolean) {
   entries.set(key, entry)
+  primed.delete(key)
   if (cache && entry.status === 'success') writeSession(key, entry.data)
   listeners.get(key)?.forEach((listener) => listener())
 }
@@ -66,6 +84,8 @@ function subscribeTo(key: string, listener: () => void) {
 export interface UseResourceOptions {
   /** Persist successful results in sessionStorage under the key. */
   cache?: boolean
+  /** Re-fetch primed (build-time) data after hydration so edits made since the build show up. */
+  revalidate?: boolean
 }
 
 export interface Resource<T> extends ResourceEntry<T> {
@@ -74,13 +94,13 @@ export interface Resource<T> extends ResourceEntry<T> {
 }
 
 /**
- * `key` identifies the resource (also the sessionStorage key); `fetcher` must be a stable
- * module-level function.
+ * `key` identifies the resource (also the sessionStorage key); `fetcher` must be stable
+ * for a given key (module-level function or useMemo'd per key).
  */
 export function useResource<T>(
   key: string,
   fetcher: (signal: AbortSignal) => Promise<T>,
-  { cache = false }: UseResourceOptions = {},
+  { cache = false, revalidate = false }: UseResourceOptions = {},
 ): Resource<T> {
   const [attempt, setAttempt] = useState(0)
 
@@ -88,21 +108,26 @@ export function useResource<T>(
   const entry = useSyncExternalStore(
     subscribe,
     () => getEntry<T>(key, cache),
-    () => LOADING as ResourceEntry<T>,
+    () => (primed.get(key) as ResourceEntry<T> | undefined) ?? (LOADING as ResourceEntry<T>),
   )
 
   useEffect(() => {
-    if (getEntry<T>(key, cache).status !== 'loading') return
+    const current = getEntry<T>(key, cache)
+    const stale = revalidate && primed.has(key)
+    if (current.status !== 'loading' && !stale) return
+
     const controller = new AbortController()
     fetcher(controller.signal)
       .then((data) => setEntry<T>(key, { status: 'success', data, error: null }, cache))
       .catch((error: unknown) => {
         if (controller.signal.aborted) return
+        // A failed revalidation keeps the build-time data on screen.
+        if (stale) return
         const message = error instanceof Error ? error.message : 'Request failed'
         setEntry<T>(key, { status: 'error', data: null, error: message }, cache)
       })
     return () => controller.abort()
-  }, [key, fetcher, cache, attempt])
+  }, [key, fetcher, cache, revalidate, attempt])
 
   const reload = useCallback(() => {
     try {

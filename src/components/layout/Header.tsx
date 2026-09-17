@@ -1,10 +1,11 @@
-import { Menu, X } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { navRoutes } from '@/data/routes'
+import { useAuth } from '@/features/auth/auth'
 import { cn } from '@/lib/utils'
 
 const MOBILE_NAV_ID = 'mobile-nav'
@@ -14,9 +15,50 @@ function navLinkClass(isActive: boolean, variant: 'desktop' | 'mobile') {
   return cn(
     'flex items-center rounded-md font-medium transition-colors hover:bg-muted hover:text-foreground',
     variant === 'desktop' ? 'h-11 px-3 text-sm' : 'h-12 px-4 text-base',
-    isActive ? 'text-foreground' : 'text-muted-foreground',
-    isActive && variant === 'desktop' && 'bg-muted',
-    isActive && variant === 'mobile' && 'bg-muted',
+    isActive ? 'bg-muted text-foreground' : 'text-muted-foreground',
+  )
+}
+
+/** Sign-in / sign-out controls; a fixed-width placeholder while a stored session is checked. */
+function AuthSlot({ variant }: { variant: 'desktop' | 'mobile' }) {
+  const { status, user, logout } = useAuth()
+
+  if (status === 'restoring') {
+    return (
+      <span
+        aria-hidden="true"
+        className={cn('block rounded-lg bg-muted', variant === 'desktop' ? 'h-11 w-24' : 'h-12 w-full')}
+      />
+    )
+  }
+
+  if (status === 'authenticated' && user) {
+    return (
+      <div className={cn('flex items-center gap-2', variant === 'mobile' && 'justify-between px-4 py-2')}>
+        <span className="truncate text-sm text-muted-foreground">Hi, {user.name}</span>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 px-4"
+          onClick={() => {
+            void logout()
+          }}
+        >
+          <LogOut aria-hidden="true" className="size-4" />
+          Log out
+        </Button>
+      </div>
+    )
+  }
+
+  return variant === 'desktop' ? (
+    <Link to="/login" className={cn(buttonVariants({ variant: 'outline' }), 'h-11 px-4')}>
+      Log in
+    </Link>
+  ) : (
+    <NavLink to="/login" className={({ isActive }) => navLinkClass(isActive, 'mobile')}>
+      Log in
+    </NavLink>
   )
 }
 
@@ -59,7 +101,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
-        <Link to="/" aria-label={`${'Suitmedia'} home`} className="shrink-0">
+        <Link to="/" aria-label="Suitmedia home" className="shrink-0">
           <Logo />
         </Link>
 
@@ -80,15 +122,9 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <Link
-            to="/login"
-            className={cn(
-              buttonVariants({ variant: 'outline' }),
-              'hidden h-11 px-4 sm:inline-flex',
-            )}
-          >
-            Log in
-          </Link>
+          <div className="hidden sm:block">
+            <AuthSlot variant="desktop" />
+          </div>
           <ThemeToggle />
           <Button
             ref={toggleRef}
@@ -131,13 +167,7 @@ export function Header() {
             </li>
           ))}
           <li className="sm:hidden">
-            <NavLink
-              to="/login"
-              onClick={close}
-              className={({ isActive }) => navLinkClass(isActive, 'mobile')}
-            >
-              Log in
-            </NavLink>
+            <AuthSlot variant="mobile" />
           </li>
         </ul>
       </nav>

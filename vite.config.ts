@@ -162,6 +162,13 @@ export default defineConfig(({ mode }) => {
         output: {
           codeSplitting: {
             groups: [
+              // Form libraries are only needed by Login and Create Blog; keep them out of
+              // the vendor chunk that every page downloads.
+              {
+                name: 'forms',
+                test: /node_modules[\\/](react-hook-form|zod|@hookform)[\\/]/,
+                priority: 3,
+              },
               // Libraries shared by the shell and the lazy pages: one cacheable chunk.
               { name: 'vendor', test: /node_modules/, minShareCount: 2, priority: 2 },
               // App modules shared by two or more pages (layout, data, ui primitives).
