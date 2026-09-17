@@ -2,9 +2,76 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Suitmedia</title>
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f8fafc" />
+    <!-- Latin subset of the web font (src/styles/fonts.css); preloaded so it can arrive before first paint. -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="/fonts/plus-jakarta-sans-latin-wght-normal.woff2"
+    />
+    <title>Suitmedia | Digital Agency in Indonesia</title>
+    <meta
+      name="description"
+      content="Suitmedia is an Indonesian digital agency delivering strategy, creative, technology and communication for enterprise clients."
+    />
+
+    <!-- Open Graph / Twitter. The per-route values are set by useSeo; canonical, og:url and
+         the image URLs are injected at build time from VITE_SITE_URL (vite.config.ts). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Suitmedia" />
+    <meta property="og:title" content="Suitmedia | Digital Agency in Indonesia" />
+    <meta
+      property="og:description"
+      content="An Indonesian digital agency delivering strategy, creative, technology and communication for enterprise clients."
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Suitmedia, digital agency in Indonesia" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Suitmedia | Digital Agency in Indonesia" />
+    <meta
+      name="twitter:description"
+      content="An Indonesian digital agency delivering strategy, creative, technology and communication for enterprise clients."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <script>
+      // Apply the stored theme before first paint so there is no flash.
+      // Light is the default; "dark" is stored only when the visitor chooses it.
+      (function () {
+        var dark = false
+        try {
+          if (localStorage.getItem('cp:theme') === 'dark') dark = true
+        } catch (e) {
+          // localStorage unavailable: keep the default.
+        }
+        document.documentElement.classList.toggle('dark', dark)
+        var meta = document.querySelector('meta[name="theme-color"]')
+        if (meta) meta.setAttribute('content', dark ? '#0b1220' : '#f8fafc')
+      })()
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Suitmedia",
+        "legalName": "PT Suitmedia Kreasi Indonesia",
+        "foundingDate": "2009",
+        "description": "Indonesian digital agency delivering strategy, creative, technology and communication for enterprise clients.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Jakarta",
+          "addressCountry": "ID"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

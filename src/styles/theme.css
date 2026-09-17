@@ -1,0 +1,121 @@
+/* Design tokens for the Suitmedia company profile redesign.
+   - Light is the default; dark is an explicit choice (opposite of the portfolio).
+   - Warm orange accent over slate neutrals, matching the Suitmedia brand.
+   - Components only use the semantic utilities (bg-background, text-primary, ...).
+   - Every text/surface pair below meets WCAG AA (>= 4.5:1) in both modes. */
+
+:root {
+  --radius: 0.75rem;
+
+  --background: oklch(0.984 0.003 247.9); /* #F8FAFC */
+  --foreground: oklch(0.208 0.04 265.8); /* #0F172A */
+  --card: oklch(1 0 0); /* #FFFFFF */
+  --card-foreground: oklch(0.208 0.04 265.8); /* #0F172A */
+  --popover: oklch(1 0 0); /* #FFFFFF */
+  --popover-foreground: oklch(0.208 0.04 265.8); /* #0F172A */
+  --primary: oklch(0.553 0.174 38.4); /* #C2410C */
+  --primary-foreground: oklch(1 0 0); /* #FFFFFF */
+  --secondary: oklch(0.968 0.007 247.9); /* #F1F5F9 */
+  --secondary-foreground: oklch(0.208 0.04 265.8); /* #0F172A */
+  --muted: oklch(0.968 0.007 247.9); /* #F1F5F9 */
+  --muted-foreground: oklch(0.446 0.037 257.3); /* #475569 */
+  --accent: oklch(0.966 0.02 58.1); /* #FFF1E7 */
+  --accent-foreground: oklch(0.47 0.143 37.3); /* #9A3412 */
+  --destructive: oklch(0.577 0.215 27.3); /* #DC2626 */
+  --border: oklch(0.929 0.013 255.5); /* #E2E8F0 */
+  --input: oklch(0.929 0.013 255.5); /* #E2E8F0 */
+  --ring: oklch(0.553 0.174 38.4); /* #C2410C */
+  --chart-1: oklch(0.553 0.174 38.4); /* #C2410C */
+  --chart-2: oklch(0.511 0.086 186.4); /* #0F766E */
+  --chart-3: oklch(0.488 0.217 264.4); /* #1D4ED8 */
+  --chart-4: oklch(0.541 0.247 293); /* #7C3AED */
+  --chart-5: oklch(0.554 0.121 66.4); /* #A16207 */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.208 0.04 265.8);
+  --sidebar-primary: oklch(0.553 0.174 38.4);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.968 0.007 247.9);
+  --sidebar-accent-foreground: oklch(0.208 0.04 265.8);
+  --sidebar-border: oklch(0.929 0.013 255.5);
+  --sidebar-ring: oklch(0.553 0.174 38.4);
+}
+
+.dark {
+  --background: oklch(0.183 0.031 263.4); /* #0B1220 */
+  --foreground: oklch(0.984 0.003 247.9); /* #F8FAFC */
+  --card: oklch(0.227 0.038 263.4); /* #131C2E */
+  --card-foreground: oklch(0.984 0.003 247.9); /* #F8FAFC */
+  --popover: oklch(0.227 0.038 263.4); /* #131C2E */
+  --popover-foreground: oklch(0.984 0.003 247.9); /* #F8FAFC */
+  --primary: oklch(0.758 0.159 55.9); /* #FB923C */
+  --primary-foreground: oklch(0.192 0.026 68.6); /* #1C1207 */
+  --secondary: oklch(0.279 0.037 260); /* #1E293B */
+  --secondary-foreground: oklch(0.984 0.003 247.9); /* #F8FAFC */
+  --muted: oklch(0.279 0.037 260); /* #1E293B */
+  --muted-foreground: oklch(0.727 0.033 257.3); /* #9AA8BC */
+  --accent: oklch(0.241 0.031 61.2); /* #2A1C10 */
+  --accent-foreground: oklch(0.837 0.117 66.3); /* #FDBA74 */
+  --destructive: oklch(0.711 0.166 22.2); /* #F87171 */
+  --border: oklch(0.313 0.038 255); /* #243244 */
+  --input: oklch(0.344 0.043 255.5); /* #2A3A4F */
+  --ring: oklch(0.758 0.159 55.9); /* #FB923C */
+  --chart-1: oklch(0.758 0.159 55.9); /* #FB923C */
+  --chart-2: oklch(0.785 0.133 181.9); /* #2DD4BF */
+  --chart-3: oklch(0.714 0.143 254.6); /* #60A5FA */
+  --chart-4: oklch(0.709 0.159 293.5); /* #A78BFA */
+  --chart-5: oklch(0.837 0.164 84.4); /* #FBBF24 */
+  --sidebar: oklch(0.227 0.038 263.4);
+  --sidebar-foreground: oklch(0.984 0.003 247.9);
+  --sidebar-primary: oklch(0.758 0.159 55.9);
+  --sidebar-primary-foreground: oklch(0.192 0.026 68.6);
+  --sidebar-accent: oklch(0.279 0.037 260);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.9);
+  --sidebar-border: oklch(0.313 0.038 255);
+  --sidebar-ring: oklch(0.758 0.159 55.9);
+}
+
+/* Expose the semantic tokens to Tailwind utilities (bg-primary, text-muted-foreground, ...). */
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans Variable', 'Jakarta Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}

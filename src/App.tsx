@@ -1,25 +1,34 @@
-import { Button } from '@/components/ui/button'
+import { lazy } from 'react'
+import { Route, Routes } from 'react-router'
+import { RootLayout } from '@/components/layout/RootLayout'
+import HomePage from '@/routes/HomePage'
 
-// Milestone 1 placeholder. Replaced by the router shell in Milestone 2.
-function App() {
+// Home is bundled with the shell because it is the most visited URL; every other page
+// is its own chunk, loaded when the visitor navigates there.
+const AboutPage = lazy(() => import('@/routes/AboutPage'))
+const ServicesPage = lazy(() => import('@/routes/ServicesPage'))
+const TeamPage = lazy(() => import('@/routes/TeamPage'))
+const BlogListPage = lazy(() => import('@/routes/BlogListPage'))
+const BlogDetailPage = lazy(() => import('@/routes/BlogDetailPage'))
+const CreateBlogPage = lazy(() => import('@/routes/CreateBlogPage'))
+const LoginPage = lazy(() => import('@/routes/LoginPage'))
+const NotFoundPage = lazy(() => import('@/routes/NotFoundPage'))
+
+export default function App() {
   return (
-    <main
-      id="main"
-      className="mx-auto flex min-h-dvh max-w-7xl flex-col items-start justify-center gap-6 px-4 md:px-6"
-    >
-      <p className="text-sm text-muted-foreground">
-        company-profile / scaffold ready
-      </p>
-      <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-        Suitmedia
-      </h1>
-      <p className="max-w-prose text-lg text-muted-foreground">
-        Vite 8, React 19, Tailwind CSS v4, shadcn/ui and react-router are
-        installed. The pages are built in the next milestones.
-      </p>
-      <Button type="button">Get in touch</Button>
-    </main>
+    <Routes>
+      <Route element={<RootLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="services" element={<ServicesPage />} />
+        <Route path="teams" element={<TeamPage />} />
+        <Route path="blog" element={<BlogListPage />} />
+        {/* Static segment wins over the :slug pattern in react-router's ranking. */}
+        <Route path="blog/new" element={<CreateBlogPage />} />
+        <Route path="blog/:slug" element={<BlogDetailPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   )
 }
-
-export default App

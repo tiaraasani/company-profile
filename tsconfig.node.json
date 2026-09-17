@@ -6,8 +6,10 @@
     "types": ["node"],
     "skipLibCheck": true,
 
-    /* Bundler mode */
-    "module": "nodenext",
+    /* Bundler mode: Vite bundles this config, so extensionless TS imports are fine
+       (vite.config.ts imports the route list from src/data/routes.ts). */
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
