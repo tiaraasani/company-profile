@@ -64,8 +64,9 @@ export function messageForLoginError(error: unknown): string {
   if (error instanceof NetworkError) {
     return "We couldn't reach the server. Check your connection and try again."
   }
+  // Unknown codes get the generic text: server messages are not meant for visitors.
   if (error instanceof BackendlessError) {
-    return LOGIN_ERRORS[error.code] ?? `Sign-in failed (${error.message}).`
+    return LOGIN_ERRORS[error.code] ?? 'Sign-in failed. Please try again.'
   }
   return 'Sign-in failed. Please try again.'
 }

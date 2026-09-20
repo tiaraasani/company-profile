@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr --logLevel warn && node scripts/prerender.mjs",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr --logLevel warn && node scripts/prerender.mjs && node scripts/check-csp.mjs",
     "lint": "eslint .",
     "lint:a11y": "oxlint --jsx-a11y-plugin --ignore-pattern \"src/components/ui/**\" src",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",

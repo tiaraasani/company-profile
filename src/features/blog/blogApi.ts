@@ -1,4 +1,5 @@
 import type { BlogPost, BlogPostInput } from './blogTypes'
+import { isValidSlug, isValidTag } from './slugify'
 import { query, quote, request } from '@/lib/backendless'
 
 /**
@@ -45,6 +46,9 @@ export interface FetchPostsOptions {
 
 /** Newest first; `content` is left out to keep the list light. */
 export async function fetchPosts({ tag, offset = 0, signal }: FetchPostsOptions = {}): Promise<BlogPost[]> {
+  // The tag comes from the URL: anything outside the tag alphabet (which has no LIKE
+  // wildcards and no quotes) cannot match a real tag, so answer without a request.
+  if (tag !== undefined && !isValidTag(tag)) return []
   const where = tag
     ? `published=true AND tags LIKE ${quote(`%,${tag},%`)}`
     : 'published=true'
@@ -56,6 +60,8 @@ export async function fetchPosts({ tag, offset = 0, signal }: FetchPostsOptions 
 }
 
 export async function fetchPostBySlug(slug: string, signal?: AbortSignal): Promise<BlogPost | null> {
+  // The slug comes from the URL; the app never creates one outside SLUG_PATTERN.
+  if (!isValidSlug(slug)) return null
   const rows = await request<BlogRow[]>(
     `/data/Blog${query({ where: `published=true AND slug=${quote(slug)}`, pageSize: 1 })}`,
     { signal, withAuth: false },

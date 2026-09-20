@@ -1,7 +1,5 @@
-import { z } from 'zod'
-import { parseTags } from './slugify'
-
-const TAG_PATTERN = /^[a-z0-9-]{2,20}$/
+import { parseTags, TAG_PATTERN } from './slugify'
+import { z } from '@/lib/zod'
 
 export const blogSchema = z.object({
   title: z

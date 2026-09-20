@@ -103,7 +103,12 @@ export function query(params: Record<string, string | number | undefined>): stri
   return parts.length > 0 ? `?${parts.join('&')}` : ''
 }
 
-/** Escapes a value for use inside single quotes in a where clause. */
+/**
+ * Quotes a value for a where clause. Backendless follows SQL-92 here: a single quote is
+ * escaped by doubling it and a backslash has no special meaning (a `\'` sequence is
+ * rejected as an invalid clause). Callers still validate the value against an allowlist
+ * first; this is the second line of defence.
+ */
 export function quote(value: string): string {
-  return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+  return `'${value.replace(/'/g, "''")}'`
 }

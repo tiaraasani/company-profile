@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CircleAlert, Eye, EyeOff, LoaderCircle, LogIn } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { useAuth } from './auth'
 import { messageForLoginError } from './authApi'
 import { demoAccount } from './demoAccount'
@@ -10,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { z } from '@/lib/zod'
 
 const loginSchema = z.object({
   email: z.email('Enter a valid email address.'),

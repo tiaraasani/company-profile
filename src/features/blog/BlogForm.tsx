@@ -38,8 +38,8 @@ function messageForPublishError(error: unknown): string {
     if (error.status === 401 || error.status === 403) {
       return 'You are not allowed to publish. Sign in again and retry.'
     }
-    return `Publishing failed (${error.message}).`
   }
+  // Server messages are not meant for visitors; the draft is kept so nothing is lost.
   return 'Publishing failed. Please try again.'
 }
 

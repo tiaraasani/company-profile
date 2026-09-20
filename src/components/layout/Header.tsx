@@ -6,6 +6,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { navRoutes } from '@/data/routes'
 import { useAuth } from '@/features/auth/auth'
+import { clearBlogDraft } from '@/features/blog/useBlogDraft'
 import { cn } from '@/lib/utils'
 
 const MOBILE_NAV_ID = 'mobile-nav'
@@ -41,6 +42,8 @@ function AuthSlot({ variant }: { variant: 'desktop' | 'mobile' }) {
           variant="outline"
           className="h-11 px-4"
           onClick={() => {
+            // Signing out on a shared computer must not leave a draft for the next person.
+            clearBlogDraft()
             void logout()
           }}
         >

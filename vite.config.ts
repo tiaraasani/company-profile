@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'node:fs'
+import { createReadStream, existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
@@ -65,6 +65,33 @@ function siteMetadata(siteUrl: string): Plugin {
 }
 
 /**
+ * Response headers from vercel.json, applied to `vite preview` too, so a local Lighthouse
+ * run sees the production headers (the Content-Security-Policy in particular).
+ */
+function vercelHeaders(): Record<string, string> {
+  const config = JSON.parse(readFileSync(path.resolve(import.meta.dirname, 'vercel.json'), 'utf8')) as {
+    headers?: { source: string; headers: { key: string; value: string }[] }[]
+  }
+  const block = config.headers?.find((entry) => entry.source === '/(.*)')
+  return Object.fromEntries((block?.headers ?? []).map((header) => [header.key, header.value]))
+}
+
+/**
+ * Inline loader for the deferred app bundle. Its text never changes between builds (the
+ * asset URLs travel in data attributes), so its SHA-256 is pinned in the CSP header of
+ * vercel.json; scripts/check-csp.mjs verifies that after every build.
+ */
+const APP_LOADER =
+  "(function(){var s=document.currentScript,entry=s.getAttribute('data-entry'),deps=(s.getAttribute('data-deps')||'').split(',').filter(Boolean),started=false;" +
+  'function load(){if(started)return;started=true;' +
+  "deps.forEach(function(href){var l=document.createElement('link');l.rel='modulepreload';l.crossOrigin='';l.href=href;document.head.appendChild(l)});" +
+  "var m=document.createElement('script');m.type='module';m.crossOrigin='';m.src=entry;document.body.appendChild(m)}" +
+  "if(document.visibilityState==='visible'&&'requestAnimationFrame'in window){requestAnimationFrame(function(){requestAnimationFrame(load)})}" +
+  'setTimeout(load,1500)})()'
+
+const escapeAttr = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+
+/**
  * Pages are prerendered, so the app bundle is only needed for hydration. Requesting it
  * after the first frame keeps it out of the first-paint critical path; a timeout fallback
  * still loads it in background tabs.
@@ -87,15 +114,10 @@ function deferAppScript(): Plugin {
         let output = html.replace(script[0], '')
         for (const match of preloads) output = output.replace(match[0], '')
 
-        const loader =
-          `<script>(function(){var deps=${JSON.stringify(deps)},entry=${JSON.stringify(script[1])},started=false;` +
-          `function load(){if(started)return;started=true;` +
-          `deps.forEach(function(href){var l=document.createElement('link');l.rel='modulepreload';l.crossOrigin='';l.href=href;document.head.appendChild(l)});` +
-          `var s=document.createElement('script');s.type='module';s.crossOrigin='';s.src=entry;document.body.appendChild(s)}` +
-          `if(document.visibilityState==='visible'&&'requestAnimationFrame'in window){requestAnimationFrame(function(){requestAnimationFrame(load)})}` +
-          `setTimeout(load,1500)})()</script>`
+        const loader = `<script data-entry="${escapeAttr(script[1])}" data-deps="${escapeAttr(deps.join(','))}">${APP_LOADER}</script>`
 
-        return output.replace('</body>', `${loader}</body>`)
+        // LF line endings everywhere: inline-script hashes must match the Linux build on Vercel.
+        return output.replace('</body>', `${loader}</body>`).replace(/\r\n/g, '\n')
       },
     },
   }
@@ -150,6 +172,9 @@ export default defineConfig(({ mode }) => {
     // No SPA fallback to index.html: each prerendered page is its own HTML file.
     appType: 'mpa',
     plugins: [react(), tailwindcss(), siteMetadata(siteUrl), deferAppScript(), previewFallback()],
+    preview: {
+      headers: vercelHeaders(),
+    },
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, './src'),

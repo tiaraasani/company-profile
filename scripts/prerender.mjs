@@ -18,6 +18,10 @@ const ssrDir = path.join(root, 'dist-ssr')
 const MARKER = '<div id="root"></div>'
 const CLIENT_RENDER_MARKER = '<!--$!'
 const POSTS_PER_PAGE = 12
+// Rows come from a table that any signed-in user can write to, so the slug is untrusted:
+// it becomes part of an HTML attribute and of the output file path below.
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const SLUG_MAX_LENGTH = 80
 
 const { prerenderRoutes } = await import(
   pathToFileURL(path.join(root, 'src', 'data', 'routes.ts')).href
@@ -74,7 +78,13 @@ async function fetchPublishedPosts() {
     )
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const rows = await response.json()
-    return rows.map(toPost).filter((post) => post.slug && post.title)
+    if (!Array.isArray(rows)) throw new Error('unexpected response shape')
+    return rows
+      .map(toPost)
+      .filter(
+        (post) =>
+          post.title && post.slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(post.slug),
+      )
   } catch (error) {
     console.warn(`prerender: could not load blog posts (${error.message}); rendering them on the client`)
     return []
@@ -91,12 +101,21 @@ if (!template.includes(MARKER)) {
 /** JSON that is safe inside a <script> element. */
 const embedJson = (value) => JSON.stringify(value).replace(/</g, '\\u003c')
 
+/** Text that is safe inside a double-quoted HTML attribute. */
+const escapeAttr = (value) =>
+  value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
+
 function page(routePath, markup, resources) {
   const data =
     resources && Object.keys(resources).length > 0
       ? `<script id="__RESOURCES__" type="application/json">${embedJson(resources)}</script>`
       : ''
-  return template.replace(MARKER, `${data}<div id="root" data-path="${routePath}">${markup}</div>`)
+  // A function replacer: with a string, `$&`, `$'` and `` $` `` inside the article data
+  // would be expanded to pieces of the template.
+  return template.replace(
+    MARKER,
+    () => `${data}<div id="root" data-path="${escapeAttr(routePath)}">${markup}</div>`,
+  )
 }
 
 /** React.lazy routes suspend on the first pass; render again until every boundary resolves. */
@@ -118,6 +137,9 @@ async function writePage(routePath, resources) {
     routePath === '/'
       ? path.join(distDir, 'index.html')
       : path.join(distDir, ...routePath.slice(1).split('/'), 'index.html')
+  if (!outFile.startsWith(distDir + path.sep)) {
+    throw new Error(`Refusing to write outside dist for route ${routePath}`)
+  }
   await mkdir(path.dirname(outFile), { recursive: true })
   await writeFile(outFile, page(routePath, markup, resources))
   console.log(
