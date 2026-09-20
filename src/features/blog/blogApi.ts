@@ -1,51 +1,18 @@
+import { LIST_PROPS, PAGE_SIZE, toPost, type BlogRow } from './blogRow'
 import type { BlogPost, BlogPostInput } from './blogTypes'
 import { isValidSlug, isValidTag } from './slugify'
-import { query, quote, request } from '@/lib/backendless'
+import { BackendlessError, NetworkError, query, quote, request } from '@/lib/backendless'
 
-/**
- * Backendless `Blog` table. Tags are stored as ",tag-one,tag-two," so a LIKE '%,tag,%'
- * filter matches whole tags only. `published` hides drafts from the public list.
- */
-export const PAGE_SIZE = 12
-const LIST_PROPS = 'objectId,title,slug,excerpt,authorName,tags,created,ownerId'
-
-interface BlogRow {
-  objectId: string
-  title?: string | null
-  slug?: string | null
-  excerpt?: string | null
-  content?: string | null
-  tags?: string | null
-  authorName?: string | null
-  created?: number | null
-  ownerId?: string | null
-}
-
-function toPost(row: BlogRow): BlogPost {
-  return {
-    objectId: row.objectId,
-    title: (row.title ?? '').trim(),
-    slug: (row.slug ?? '').trim(),
-    excerpt: (row.excerpt ?? '').trim(),
-    content: row.content ?? '',
-    tags: (row.tags ?? '')
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter(Boolean),
-    authorName: (row.authorName ?? '').trim() || 'Suitmedia',
-    created: row.created ?? 0,
-    ownerId: row.ownerId ?? null,
-  }
-}
+/* Backendless `Blog` table. `published` hides drafts from the public list; the row shape and
+   mapper live in blogRow.ts so the build script can use the same ones. */
 
 export interface FetchPostsOptions {
   tag?: string
-  offset?: number
   signal?: AbortSignal
 }
 
-/** Newest first; `content` is left out to keep the list light. */
-export async function fetchPosts({ tag, offset = 0, signal }: FetchPostsOptions = {}): Promise<BlogPost[]> {
+/** Newest first, first page only; `content` is left out to keep the list light. */
+export async function fetchPosts({ tag, signal }: FetchPostsOptions = {}): Promise<BlogPost[]> {
   // The tag comes from the URL: anything outside the tag alphabet (which has no LIKE
   // wildcards and no quotes) cannot match a real tag, so answer without a request.
   if (tag !== undefined && !isValidTag(tag)) return []
@@ -53,7 +20,7 @@ export async function fetchPosts({ tag, offset = 0, signal }: FetchPostsOptions 
     ? `published=true AND tags LIKE ${quote(`%,${tag},%`)}`
     : 'published=true'
   const rows = await request<BlogRow[]>(
-    `/data/Blog${query({ where, sortBy: 'created desc', pageSize: PAGE_SIZE, offset, props: LIST_PROPS })}`,
+    `/data/Blog${query({ where, sortBy: 'created desc', pageSize: PAGE_SIZE, props: LIST_PROPS })}`,
     { signal, withAuth: false },
   )
   return rows.filter((row) => row.slug && row.title).map(toPost)
@@ -67,15 +34,6 @@ export async function fetchPostBySlug(slug: string, signal?: AbortSignal): Promi
     { signal, withAuth: false },
   )
   return rows[0] ? toPost(rows[0]) : null
-}
-
-/** Slugs of every published post (used by the build to prerender article pages). */
-export async function fetchPublishedSlugs(signal?: AbortSignal): Promise<string[]> {
-  const rows = await request<BlogRow[]>(
-    `/data/Blog${query({ where: 'published=true', props: 'slug', pageSize: 100 })}`,
-    { signal, withAuth: false },
-  )
-  return rows.map((row) => row.slug ?? '').filter(Boolean)
 }
 
 async function slugExists(slug: string): Promise<boolean> {
@@ -111,6 +69,23 @@ export async function createPost(input: BlogPostInput): Promise<BlogPost> {
     },
   })
   return toPost(row)
+}
+
+/** Visitor-facing text for a failed createPost(); server messages are never shown as-is. */
+export function messageForPublishError(error: unknown): string {
+  if (error instanceof NetworkError) {
+    return "We couldn't reach the server. Your draft is kept; check your connection and try again."
+  }
+  if (error instanceof BackendlessError) {
+    if (error.status === 413) {
+      return 'The post is longer than the Blog table currently allows. In the Backendless console, change the `content` column type to TEXT (Data > Blog > Schema), then try again.'
+    }
+    if (error.status === 401 || error.status === 403) {
+      return 'You are not allowed to publish. Sign in again and retry.'
+    }
+  }
+  // The draft is kept so nothing is lost.
+  return 'Publishing failed. Please try again.'
 }
 
 export function postCacheKey(slug: string): string {

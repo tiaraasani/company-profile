@@ -1,15 +1,14 @@
 import { Link } from 'react-router'
 import type { BlogPost } from './blogTypes'
-import { Badge } from '@/components/ui/badge'
+import { PostDate, TagBadge } from './PostMeta'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatDate } from '@/lib/format'
 
 export function BlogCard({ post }: { post: BlogPost }) {
   return (
     <Card className="h-full">
       <CardHeader>
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          <time dateTime={new Date(post.created).toISOString()}>{formatDate(post.created)}</time>
+          <PostDate timestamp={post.created} />
         </p>
         <CardTitle>
           <h3 className="text-xl font-semibold leading-snug">
@@ -31,9 +30,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
       {post.tags.length > 0 && (
         <CardFooter className="flex-wrap gap-1.5">
           {post.tags.map((tag) => (
-            <Badge key={tag} variant="outline" asChild>
-              <Link to={`/blog?tag=${encodeURIComponent(tag)}`}>#{tag}</Link>
-            </Badge>
+            <TagBadge key={tag} tag={tag} />
           ))}
         </CardFooter>
       )}

@@ -3,13 +3,13 @@ import { lazy, Suspense, useMemo } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { Section } from '@/components/layout/Section'
 import { ErrorState } from '@/components/shared/ErrorState'
-import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { company } from '@/data/company'
 import { fetchPostBySlug, postCacheKey } from '@/features/blog/blogApi'
+import { PostDate, TagBadge } from '@/features/blog/PostMeta'
 import { useSeo } from '@/hooks/useSeo'
-import { formatDate, readingTime } from '@/lib/format'
+import { readingTime } from '@/lib/format'
 import { useResource } from '@/lib/resource'
 import { cn } from '@/lib/utils'
 
@@ -85,18 +85,14 @@ export default function BlogDetailPage() {
                 </h1>
                 <p className="text-muted-foreground">
                   By {article.authorName} on{' '}
-                  <time dateTime={new Date(article.created).toISOString()}>
-                    {formatDate(article.created)}
-                  </time>
+                  <PostDate timestamp={article.created} />
                   , {readingTime(article.content)} min read
                 </p>
                 {article.tags.length > 0 && (
                   <ul className="flex flex-wrap gap-1.5" aria-label="Tags">
                     {article.tags.map((tag) => (
                       <li key={tag}>
-                        <Badge variant="outline" asChild>
-                          <Link to={`/blog?tag=${encodeURIComponent(tag)}`}>#{tag}</Link>
-                        </Badge>
+                        <TagBadge tag={tag} />
                       </li>
                     ))}
                   </ul>

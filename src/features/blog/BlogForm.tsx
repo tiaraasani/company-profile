@@ -3,10 +3,11 @@ import { CircleAlert, LoaderCircle, Send } from 'lucide-react'
 import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
-import { createPost, uniqueSlug } from './blogApi'
+import { createPost, messageForPublishError, uniqueSlug } from './blogApi'
 import { blogSchema, EMPTY_BLOG_VALUES, type BlogFormInput, type BlogFormValues } from './blogSchema'
 import { parseTags, slugify } from './slugify'
 import { clearBlogDraft, useBlogDraftAutosave, useStoredBlogDraft } from './useBlogDraft'
+import { FormErrorSummary } from '@/components/shared/FormErrorSummary'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,7 +17,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/features/auth/auth'
-import { BackendlessError, NetworkError } from '@/lib/backendless'
 
 const MarkdownRenderer = lazy(() => import('./MarkdownRenderer'))
 
@@ -25,22 +25,6 @@ const FIELD_LABELS: Record<keyof BlogFormInput, string> = {
   excerpt: 'Excerpt',
   content: 'Content',
   tags: 'Tags',
-}
-
-function messageForPublishError(error: unknown): string {
-  if (error instanceof NetworkError) {
-    return "We couldn't reach the server. Your draft is kept; check your connection and try again."
-  }
-  if (error instanceof BackendlessError) {
-    if (error.status === 413) {
-      return 'The post is longer than the Blog table currently allows. In the Backendless console, change the `content` column type to TEXT (Data > Blog > Schema), then try again.'
-    }
-    if (error.status === 401 || error.status === 403) {
-      return 'You are not allowed to publish. Sign in again and retry.'
-    }
-  }
-  // Server messages are not meant for visitors; the draft is kept so nothing is lost.
-  return 'Publishing failed. Please try again.'
 }
 
 export function BlogForm() {
@@ -139,27 +123,17 @@ export function BlogForm() {
       )}
 
       {submitCount > 0 && errorEntries.length > 0 && (
-        <div
+        <FormErrorSummary
           ref={summaryRef}
-          tabIndex={-1}
-          role="alert"
-          aria-labelledby={ids.summary}
-          className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm"
-        >
-          <p id={ids.summary} className="flex items-center gap-2 font-semibold">
-            <CircleAlert aria-hidden="true" className="size-4 text-destructive" />
-            Please fix the following before publishing
-          </p>
-          <ul className="mt-2 list-disc space-y-1 ps-5">
-            {errorEntries.map((entry) => (
-              <li key={entry.key}>
-                <a href={`#${ids[entry.key]}`} className="underline underline-offset-4">
-                  {FIELD_LABELS[entry.key]}: {entry.message}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+          headingId={ids.summary}
+          title="Please fix the following before publishing"
+          items={errorEntries.map((entry) => ({
+            id: entry.key,
+            href: `#${ids[entry.key]}`,
+            label: FIELD_LABELS[entry.key],
+            message: entry.message,
+          }))}
+        />
       )}
 
       {publishError && (

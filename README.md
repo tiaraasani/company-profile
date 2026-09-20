@@ -145,7 +145,7 @@ curl.exe -s "$base/data/Blog?where=published%3Dtrue&pageSize=1"                 
   raised TBT by 50-120 ms in Lighthouse and made about one run in five fail with
   `NO_NAVSTART`; the site opens no popups, so the header bought nothing here.
 - **Inline scripts and the CSP**: the theme script in `index.html` and the app loader in
-  `vite.config.ts` are the only inline scripts. `scripts/check-csp.mjs` runs at the end of
+  `vite/defer-app-script.ts` are the only inline scripts. `scripts/check-csp.mjs` runs at the end of
   `npm run build` and fails with the new hash whenever one of them changes; paste that hash
   into the `script-src` directive. Markdown images may come from any `https:` host; fetches
   may only go to Backendless (any `*.backendless.app` subdomain or `api.backendless.com`)
@@ -187,7 +187,7 @@ curl.exe -s "$base/data/Blog?where=published%3Dtrue&pageSize=1"                 
   through the `vercel.json` rewrite; `main.tsx` preloads the page chunk before the first
   render (`src/lib/lazyWithPreload.ts`) so there is no skeleton-to-page layout shift.
 - **Deferred app script**: the module script and its preloads are injected after the
-  first frame (`deferAppScript` in `vite.config.ts`), keeping JavaScript off the LCP path.
+  first frame (`vite/defer-app-script.ts`), keeping JavaScript off the LCP path.
 - **Chunks**: `vendor` (router, radix, lucide), `forms` (react-hook-form + zod, Login and
   editor only), `MarkdownRenderer` (react-markdown + remark-gfm, article and preview only).
 - Self-hosted Plus Jakarta Sans with `font-display: optional` and a metric-matched fallback.

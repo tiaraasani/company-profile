@@ -17,15 +17,13 @@ const distDir = path.join(root, 'dist')
 const ssrDir = path.join(root, 'dist-ssr')
 const MARKER = '<div id="root"></div>'
 const CLIENT_RENDER_MARKER = '<!--$!'
-const POSTS_PER_PAGE = 12
-// Rows come from a table that any signed-in user can write to, so the slug is untrusted:
-// it becomes part of an HTML attribute and of the output file path below.
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const SLUG_MAX_LENGTH = 80
 
-const { prerenderRoutes } = await import(
-  pathToFileURL(path.join(root, 'src', 'data', 'routes.ts')).href
-)
+// Node strips the TypeScript types, so the build shares the app's own modules: the route
+// list, the row mapper and the slug rule. One definition each, nothing to keep in sync.
+const appModule = (...segments) => import(pathToFileURL(path.join(root, 'src', ...segments)).href)
+const { prerenderRoutes } = await appModule('data', 'routes.ts')
+const { PAGE_SIZE, toPost } = await appModule('features', 'blog', 'blogRow.ts')
+const { isValidSlug } = await appModule('features', 'blog', 'slugify.ts')
 const { render } = await import(pathToFileURL(path.join(ssrDir, 'entry-server.js')).href)
 
 /* ---- Backendless data for the blog pages -------------------------------------------- */
@@ -47,24 +45,6 @@ async function loadEnvFiles() {
   }
 }
 
-/** Same mapping as src/features/blog/blogApi.ts (kept in plain JS for the build). */
-function toPost(row) {
-  return {
-    objectId: row.objectId,
-    title: (row.title ?? '').trim(),
-    slug: (row.slug ?? '').trim(),
-    excerpt: (row.excerpt ?? '').trim(),
-    content: row.content ?? '',
-    tags: (row.tags ?? '')
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter(Boolean),
-    authorName: (row.authorName ?? '').trim() || 'Suitmedia',
-    created: row.created ?? 0,
-    ownerId: row.ownerId ?? null,
-  }
-}
-
 async function fetchPublishedPosts() {
   await loadEnvFiles()
   const base = (process.env.VITE_BACKENDLESS_API_URL ?? '').trim().replace(/\/+$/, '')
@@ -79,12 +59,9 @@ async function fetchPublishedPosts() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const rows = await response.json()
     if (!Array.isArray(rows)) throw new Error('unexpected response shape')
-    return rows
-      .map(toPost)
-      .filter(
-        (post) =>
-          post.title && post.slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(post.slug),
-      )
+    // Rows come from a table that signed-in users can write to, so the slug is untrusted:
+    // it becomes part of an HTML attribute and of the output file path below.
+    return rows.map(toPost).filter((post) => post.title && isValidSlug(post.slug))
   } catch (error) {
     console.warn(`prerender: could not load blog posts (${error.message}); rendering them on the client`)
     return []
@@ -151,7 +128,7 @@ async function writePage(routePath, resources) {
 await writeFile(path.join(distDir, 'app.html'), page('', '', null))
 
 const posts = await fetchPublishedPosts()
-const listResources = { 'cp:posts:all': posts.slice(0, POSTS_PER_PAGE).map(({ content: _, ...rest }) => rest) }
+const listResources = { 'cp:posts:all': posts.slice(0, PAGE_SIZE).map(({ content: _, ...rest }) => rest) }
 
 for (const routePath of prerenderRoutes) {
   await writePage(routePath, routePath === '/blog' ? listResources : {})

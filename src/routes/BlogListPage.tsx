@@ -16,6 +16,14 @@ import { cn } from '@/lib/utils'
 const meta = findRoute('/blog')!
 const SKELETON_COUNT = 6
 
+/** Filter chip; the active one is filled with the brand colour. */
+function chipClass(active: boolean) {
+  return cn(
+    'inline-flex h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors hover:bg-muted',
+    active && 'bg-primary text-primary-foreground hover:bg-primary/90',
+  )
+}
+
 function PostSkeleton() {
   return (
     <div className="flex h-full flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
@@ -75,10 +83,7 @@ export default function BlogListPage() {
                 <Link
                   to="/blog"
                   aria-current={tag ? undefined : 'page'}
-                  className={cn(
-                    'inline-flex h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors hover:bg-muted',
-                    !tag && 'bg-primary text-primary-foreground hover:bg-primary/90',
-                  )}
+                  className={chipClass(!tag)}
                 >
                   All
                 </Link>
@@ -88,10 +93,7 @@ export default function BlogListPage() {
                   <Link
                     to={`/blog?tag=${encodeURIComponent(item)}`}
                     aria-current={tag === item ? 'page' : undefined}
-                    className={cn(
-                      'inline-flex h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors hover:bg-muted',
-                      tag === item && 'bg-primary text-primary-foreground hover:bg-primary/90',
-                    )}
+                    className={chipClass(tag === item)}
                   >
                     #{item}
                   </Link>
