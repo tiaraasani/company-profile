@@ -3,6 +3,8 @@
 .markdown {
   font-size: 1.0625rem;
   line-height: 1.75;
+  /* Long URLs or unbroken words from authors must wrap instead of widening the page. */
+  overflow-wrap: anywhere;
 }
 
 .markdown > * + * {

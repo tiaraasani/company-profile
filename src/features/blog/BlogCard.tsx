@@ -36,7 +36,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
           <PostDate timestamp={post.created} />
         </p>
         <CardTitle>
-          <h3 className="text-xl font-semibold leading-snug">
+          <h3 className="text-xl font-semibold leading-snug wrap-anywhere">
             <Link
               to={`/blog/${post.slug}`}
               className="underline-offset-4 hover:text-primary hover:underline"
@@ -46,7 +46,9 @@ export function BlogCard({ post }: { post: BlogPost }) {
           </h3>
         </CardTitle>
         {post.excerpt && (
-          <CardDescription className="line-clamp-3 leading-relaxed">{post.excerpt}</CardDescription>
+          <CardDescription className="line-clamp-3 leading-relaxed wrap-anywhere">
+            {post.excerpt}
+          </CardDescription>
         )}
       </CardHeader>
       <CardContent className="mt-auto">

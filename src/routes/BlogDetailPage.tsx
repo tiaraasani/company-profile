@@ -80,7 +80,7 @@ export default function BlogDetailPage() {
             </Link>
             {article ? (
               <>
-                <h1 id="page-title" className="text-4xl font-bold tracking-tight text-balance md:text-5xl">
+                <h1 id="page-title" className="text-4xl font-bold tracking-tight text-balance wrap-anywhere md:text-5xl">
                   {article.title}
                 </h1>
                 <p className="text-muted-foreground">
