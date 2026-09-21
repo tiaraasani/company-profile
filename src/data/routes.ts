@@ -37,6 +37,26 @@ export const routes: RouteMeta[] = [
     indexable: true,
   },
   {
+    path: '/industries',
+    label: 'Industries',
+    inNav: true,
+    title: 'Industries We Serve | Suitmedia',
+    description:
+      'Eighteen sectors, from automotive and financials to healthcare and tourism, served with digital strategy, creative, technology and communication.',
+    prerender: true,
+    indexable: true,
+  },
+  {
+    path: '/work',
+    label: 'Work',
+    inNav: true,
+    title: 'Our Case Studies | Suitmedia',
+    description:
+      'Success stories where clients overcame challenges with our expertise: e-learning, commerce, mobile apps, campaigns and more.',
+    prerender: true,
+    indexable: true,
+  },
+  {
     path: '/blog',
     label: 'Insights',
     inNav: true,

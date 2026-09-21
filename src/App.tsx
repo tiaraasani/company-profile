@@ -13,6 +13,8 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="about" element={<pages.about />} />
         <Route path="services" element={<pages.services />} />
+        <Route path="industries" element={<pages.industries />} />
+        <Route path="work" element={<pages.work />} />
         <Route path="teams" element={<pages.teams />} />
         <Route path="blog" element={<pages.blogList />} />
         {/* Static segment wins over the :slug pattern in react-router's ranking. */}

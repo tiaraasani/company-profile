@@ -24,11 +24,6 @@ export interface FaqItem {
   answer: string
 }
 
-export interface Industry {
-  name: string
-  icon: IconName
-}
-
 /** Culture: "purpose, process and people" from the About page, plus the impact statement. */
 export const values: Value[] = [
   {
@@ -165,14 +160,4 @@ export const faq: FaqItem[] = [
     answer:
       'Get in touch for a discovery session where we discuss your challenges and outline a tailored roadmap.',
   },
-]
-
-/** Sectors mentioned on the About page. */
-export const industries: Industry[] = [
-  { name: 'Finance', icon: 'landmark' },
-  { name: 'Healthcare', icon: 'heart-pulse' },
-  { name: 'Electronics', icon: 'cpu' },
-  { name: 'Retail', icon: 'shopping-bag' },
-  { name: 'FMCG', icon: 'package' },
-  { name: 'Public sector', icon: 'building' },
 ]

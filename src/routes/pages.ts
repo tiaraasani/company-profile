@@ -8,6 +8,8 @@ import { lazyWithPreload } from '@/lib/lazyWithPreload'
 export const pages = {
   about: lazyWithPreload(() => import('@/routes/AboutPage')),
   services: lazyWithPreload(() => import('@/routes/ServicesPage')),
+  industries: lazyWithPreload(() => import('@/routes/IndustriesPage')),
+  work: lazyWithPreload(() => import('@/routes/WorkPage')),
   teams: lazyWithPreload(() => import('@/routes/TeamPage')),
   blogList: lazyWithPreload(() => import('@/routes/BlogListPage')),
   blogDetail: lazyWithPreload(() => import('@/routes/BlogDetailPage')),
@@ -21,6 +23,8 @@ export function preloadPage(pathname: string): Promise<void> {
   const path = pathname.replace(/(.)\/+$/, '$1')
   if (path === '/about') return pages.about.preload()
   if (path === '/services') return pages.services.preload()
+  if (path === '/industries') return pages.industries.preload()
+  if (path === '/work') return pages.work.preload()
   if (path === '/teams') return pages.teams.preload()
   if (path === '/blog') return pages.blogList.preload()
   // Without a stored session the editor redirects to /login, so that is the chunk to warm.
