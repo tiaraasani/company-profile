@@ -1,17 +1,23 @@
 # Suitmedia company profile (redesign)
 
-Company profile website built for Purwadhika Code Challenge 2: eight pages, login and a
+Company profile website built for Purwadhika Code Challenge 2: eleven pages, login and a
 Markdown blog on Backendless, with every page prerendered to static HTML for PageSpeed.
-Student project, not affiliated with Suitmedia.
+The structure, menu and section headings follow suitmedia.com (Expertises, Industries,
+Work, Insights, About, Contact); the sections the brief requires (company overview and
+testimonials on the home page, pricing and testimonials per service, a team page from
+randomuser.me, a blog with login) are kept. Student project, not affiliated with Suitmedia.
 
-| Route | Page | Data | Prerendered | Auth |
+| Route | Page (original name) | Data | Prerendered | Auth |
 |---|---|---|---|---|
 | `/` | Home | static (`src/data`) | yes | public |
-| `/about` | About Us | static | yes | public |
-| `/services` | Services | static | yes | public |
-| `/teams` | Teams | randomuser.me (seeded, cached in sessionStorage) | yes (skeleton) | public |
-| `/blog` | Blog list | Backendless `Blog` | yes, revalidated on load | public |
-| `/blog/<slug>` | Blog detail (Markdown) | Backendless `Blog` | yes for posts that exist at build time, client-rendered otherwise | public |
+| `/services` | Expertises | static, 4 pillars x 4 services | yes | public |
+| `/industries` | Industries | static, 18 sectors | yes | public |
+| `/work` | Work (case studies) | static, 12 case studies | yes | public |
+| `/blog` | Insights (Articles) | Backendless `Blog`, "Load More" pages | yes, revalidated on load | public |
+| `/blog/<slug>` | Article (Markdown) | Backendless `Blog` | yes for posts that exist at build time, client-rendered otherwise | public |
+| `/about` | About | static | yes | public |
+| `/teams` | Team | randomuser.me (seeded, cached in sessionStorage) | yes (skeleton) | public |
+| `/contact` | Contact | `POST /data/Inquiries` | yes | public |
 | `/blog/new` | Write a post | `POST /data/Blog` | no | **login required** |
 | `/login` | Log in | `POST /users/login` | yes | anonymous only (signed-in users are redirected) |
 | `*` | 404 | – | no | public |
@@ -89,6 +95,11 @@ enabled under Users → Registration / Login (email confirmation off).
 | `published` | BOOLEAN | the public queries filter on `published=true` |
 | `ownerId`, `created`, `updated`, `objectId` | system | set by Backendless |
 
+**Inquiries** (created by the first contact-form submission through dynamic schema):
+`subject`, `name`, `company`, `email`, `phone`, `country`, `message` (STRING, the form
+limits it to 500 characters) and `source`. Visitors may only create rows; nobody may read
+them from the browser.
+
 Turn dynamic schema off (Manage → App Settings) once the columns exist.
 
 ### Permissions (Data → table → Permissions tab)
@@ -101,6 +112,7 @@ Set the three user roles; leave the API-key roles (RestUser, JSUser, …) grey.
 |---|---|---|---|---|---|
 | Blog | NotAuthenticatedUser, GuestUser | ✅ | ❌ | ❌ | ❌ |
 | Blog | AuthenticatedUser | ✅ | ✅ | ❌ | ❌ |
+| Inquiries | NotAuthenticatedUser, GuestUser, AuthenticatedUser | ❌ | ✅ | ❌ | ❌ |
 | Users | NotAuthenticatedUser, GuestUser, AuthenticatedUser | ❌ | ❌ | ❌ | ❌ |
 
 The app never edits or deletes posts, so UPDATE/REMOVE stay denied for everyone. If an
@@ -172,8 +184,9 @@ curl.exe -s "$base/data/Blog?where=published%3Dtrue&pageSize=1"                 
 | Theme | `src/context/ThemeProvider.tsx` | Context + localStorage `cp:theme`, pre-paint script in `index.html` |
 | Remote data (team, posts, one post) | `src/lib/resource.ts` | `useResource(key, fetcher)` store: `useSyncExternalStore`, primed from build-time JSON, optional sessionStorage cache, revalidation, `reload()` |
 | Blog draft | `src/features/blog/useBlogDraft.ts` | react-hook-form `watch` → debounced localStorage `cp:blog-draft`; restore banner + discard |
-| Forms | `LoginForm.tsx`, `BlogForm.tsx` | react-hook-form + zod 4 (`z.input`/`z.output` for the tags transform), shadcn `Field` |
+| Forms | `LoginForm.tsx`, `BlogForm.tsx`, `InquiryForm.tsx` | react-hook-form + zod 4 (`z.input`/`z.output` for the tags transform), shadcn `Field` |
 | URL state | `BlogListPage.tsx`, `LoginPage.tsx` | `useSearchParams` (`?tag=`), `location.state.from` |
+| Load More pages | `BlogListPage.tsx` | `useState` per tag; the first page comes from the resource store, later pages are appended and de-duplicated |
 | Local UI | Header, carousel, tabs | `useState`, adjust-state-during-render for route changes |
 
 ## Performance approach

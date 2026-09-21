@@ -1,7 +1,6 @@
 import { ArrowRight, Mail } from 'lucide-react'
 import { Link } from 'react-router'
 import { buttonVariants } from '@/components/ui/button'
-import { company } from '@/data/company'
 import { cn } from '@/lib/utils'
 
 interface CtaBandProps {
@@ -29,13 +28,13 @@ export function CtaBand({
           <p className="text-lg">{lead}</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <a
-            href={`mailto:${company.email}`}
+          <Link
+            to="/contact"
             className={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), 'h-11 px-6 text-base')}
           >
             <Mail aria-hidden="true" className="size-4" />
             Get a Free Consultation
-          </a>
+          </Link>
           <Link
             to={secondaryTo}
             className={cn(

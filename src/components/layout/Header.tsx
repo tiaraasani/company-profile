@@ -135,6 +135,9 @@ export function Header() {
           <div className="hidden lg:block">
             <AuthSlot variant="desktop" />
           </div>
+          <Link to="/contact" className={cn(buttonVariants(), 'hidden h-11 px-4 lg:inline-flex')}>
+            Contact
+          </Link>
           <ThemeToggle />
           <Button
             ref={toggleRef}
@@ -180,6 +183,15 @@ export function Header() {
               </NavLink>
             </li>
           ))}
+          <li>
+            <NavLink
+              to="/contact"
+              onClick={close}
+              className={({ isActive }) => navLinkClass(isActive, 'mobile')}
+            >
+              Contact
+            </NavLink>
+          </li>
           <li>
             <NavLink
               to="/blog/new"

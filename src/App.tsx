@@ -27,6 +27,7 @@ export default function App() {
           }
         />
         <Route path="blog/:slug" element={<pages.blogDetail />} />
+        <Route path="contact" element={<pages.contact />} />
         <Route path="login" element={<pages.login />} />
         <Route path="*" element={<pages.notFound />} />
       </Route>

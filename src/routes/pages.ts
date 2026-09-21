@@ -14,6 +14,7 @@ export const pages = {
   blogList: lazyWithPreload(() => import('@/routes/BlogListPage')),
   blogDetail: lazyWithPreload(() => import('@/routes/BlogDetailPage')),
   createBlog: lazyWithPreload(() => import('@/routes/CreateBlogPage')),
+  contact: lazyWithPreload(() => import('@/routes/ContactPage')),
   login: lazyWithPreload(() => import('@/routes/LoginPage')),
   notFound: lazyWithPreload(() => import('@/routes/NotFoundPage')),
 }
@@ -30,6 +31,7 @@ export function preloadPage(pathname: string): Promise<void> {
   // Without a stored session the editor redirects to /login, so that is the chunk to warm.
   if (path === '/blog/new') return getStoredToken() ? pages.createBlog.preload() : pages.login.preload()
   if (path.startsWith('/blog/')) return pages.blogDetail.preload()
+  if (path === '/contact') return pages.contact.preload()
   if (path === '/login') return pages.login.preload()
   if (path === '/') return Promise.resolve()
   return pages.notFound.preload()

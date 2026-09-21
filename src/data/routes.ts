@@ -87,6 +87,15 @@ export const routes: RouteMeta[] = [
     indexable: true,
   },
   {
+    path: '/contact',
+    label: 'Contact',
+    title: 'Contact | Suitmedia',
+    description:
+      'Ready to begin your journey with us? Send a request for a free consultation or visit one of our five offices.',
+    prerender: true,
+    indexable: true,
+  },
+  {
     path: '/blog/new',
     label: 'Write a post',
     title: 'Write a post | Suitmedia',
