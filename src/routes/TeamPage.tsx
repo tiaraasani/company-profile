@@ -13,8 +13,8 @@ export default function TeamPage() {
   return (
     <>
       <PageHero
-        eyebrow="Teams"
-        title="The people behind the work"
+        eyebrow="Team"
+        title="Fuel Innovation with Our Visionary People"
         lead="Strategists, engineers, designers and analysts who stay with a client from discovery to launch."
       />
 
@@ -30,8 +30,10 @@ export default function TeamPage() {
       </Section>
 
       <CtaBand
-        title="Join the team"
+        title="Are You Ready to Embark on New Journey?"
         lead="We hire strategists, designers, engineers and analysts who like solving real problems together."
+        secondaryTo="/about"
+        secondaryLabel="Learn About Our Culture"
       />
     </>
   )

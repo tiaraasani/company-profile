@@ -1,14 +1,16 @@
-import { PenLine } from 'lucide-react'
-import { useMemo } from 'react'
+import { LoaderCircle, PenLine } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { PageHero } from '@/components/layout/PageHero'
 import { Section } from '@/components/layout/Section'
 import { ErrorState } from '@/components/shared/ErrorState'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { findRoute } from '@/data/routes'
 import { BlogCard } from '@/features/blog/BlogCard'
 import { fetchPosts, postsCacheKey } from '@/features/blog/blogApi'
+import { PAGE_SIZE } from '@/features/blog/blogRow'
+import type { BlogPost } from '@/features/blog/blogTypes'
 import { useSeo } from '@/hooks/useSeo'
 import { useResource } from '@/lib/resource'
 import { cn } from '@/lib/utils'
@@ -24,19 +26,33 @@ function chipClass(active: boolean) {
   )
 }
 
+/** Pages fetched by the "Load More" button, kept per tag so switching filters starts over. */
+interface MoreState {
+  tag: string | undefined
+  pages: BlogPost[][]
+  status: 'idle' | 'loading' | 'error'
+}
+
 function PostSkeleton() {
   return (
-    <div className="flex h-full flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
-      <Skeleton className="h-3 w-24" />
-      <Skeleton className="h-6 w-5/6" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-2/3" />
-      <Skeleton className="mt-auto h-4 w-28" />
+    <div className="flex h-full flex-col gap-3 overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      <Skeleton className="aspect-video w-full rounded-none" />
+      <div className="flex flex-col gap-3 p-4">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-6 w-5/6" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="mt-2 h-4 w-28" />
+      </div>
     </div>
   )
 }
 
+/**
+ * "Articles", like the original Insights page: a card grid with a Load More button.
+ * The first page is prerendered at build time and revalidated after hydration; the tag
+ * filter lives in the URL (?tag=) so filtered views can be shared.
+ */
 export default function BlogListPage() {
   useSeo(meta.title, meta.description, meta.path)
   const [searchParams] = useSearchParams()
@@ -46,21 +62,50 @@ export default function BlogListPage() {
     () => (signal: AbortSignal) => fetchPosts({ tag, signal }),
     [tag],
   )
-  // The unfiltered list is prerendered at build time; it is revalidated after hydration so
-  // posts published since the last deploy appear too.
   const posts = useResource(postsCacheKey(tag), fetcher, { revalidate: true })
 
+  // Extra pages are local state; changing the filter resets them (adjust-state-during-render).
+  const [more, setMore] = useState<MoreState>({ tag, pages: [], status: 'idle' })
+  if (more.tag !== tag) setMore({ tag, pages: [], status: 'idle' })
+
+  const firstPage = posts.data
+  const allPosts = useMemo(() => {
+    const seen = new Set<string>()
+    return [...(firstPage ?? []), ...more.pages.flat()].filter((post) => {
+      if (seen.has(post.objectId)) return false
+      seen.add(post.objectId)
+      return true
+    })
+  }, [firstPage, more.pages])
+  const lastPage = more.pages.length > 0 ? more.pages[more.pages.length - 1] : (firstPage ?? [])
+  const hasMore = posts.status === 'success' && lastPage.length === PAGE_SIZE
+
   const tags = useMemo(
-    () => [...new Set((posts.data ?? []).flatMap((post) => post.tags))].sort(),
-    [posts.data],
+    () => [...new Set(allPosts.flatMap((post) => post.tags))].sort(),
+    [allPosts],
   )
+
+  const loadMore = async () => {
+    setMore((state) => ({ ...state, status: 'loading' }))
+    try {
+      const page = await fetchPosts({
+        tag,
+        offset: (firstPage?.length ?? 0) + more.pages.flat().length,
+      })
+      setMore((state) =>
+        state.tag === tag ? { tag, pages: [...state.pages, page], status: 'idle' } : state,
+      )
+    } catch {
+      setMore((state) => ({ ...state, status: 'error' }))
+    }
+  }
 
   return (
     <>
       <PageHero
-        eyebrow="Blog"
-        title="Insights"
-        lead="Notes on digital strategy, design and engineering from our team."
+        eyebrow="Insights"
+        title="Articles"
+        lead="Notes on digital strategy, design, technology and marketing from the Suitmedia team."
       >
         <Link
           to="/blog/new"
@@ -80,11 +125,7 @@ export default function BlogListPage() {
           <nav aria-label="Filter by tag" className="mb-8">
             <ul className="flex flex-wrap gap-2">
               <li>
-                <Link
-                  to="/blog"
-                  aria-current={tag ? undefined : 'page'}
-                  className={chipClass(!tag)}
-                >
+                <Link to="/blog" aria-current={tag ? undefined : 'page'} className={chipClass(!tag)}>
                   All
                 </Link>
               </li>
@@ -124,7 +165,7 @@ export default function BlogListPage() {
           </div>
         )}
 
-        {posts.status === 'success' && (posts.data?.length ?? 0) === 0 && (
+        {posts.status === 'success' && allPosts.length === 0 && (
           <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed p-8">
             <p className="text-lg font-semibold">
               {tag ? `No posts tagged #${tag} yet.` : 'No posts yet.'}
@@ -139,14 +180,44 @@ export default function BlogListPage() {
           </div>
         )}
 
-        {posts.status === 'success' && (posts.data?.length ?? 0) > 0 && (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.data!.map((post) => (
-              <li key={post.objectId}>
-                <BlogCard post={post} />
-              </li>
-            ))}
-          </ul>
+        {posts.status === 'success' && allPosts.length > 0 && (
+          <>
+            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {allPosts.map((post) => (
+                <li key={post.objectId}>
+                  <BlogCard post={post} />
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <output className="text-sm text-muted-foreground">
+                Showing {allPosts.length} article{allPosts.length === 1 ? '' : 's'}
+              </output>
+              {more.status === 'error' && (
+                <p role="alert" className="text-sm text-destructive">
+                  The next page could not be loaded. Try again.
+                </p>
+              )}
+              {hasMore && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 px-6"
+                  onClick={() => {
+                    void loadMore()
+                  }}
+                  disabled={more.status === 'loading'}
+                  aria-busy={more.status === 'loading'}
+                >
+                  {more.status === 'loading' && (
+                    <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
+                  )}
+                  {more.status === 'loading' ? 'Loading' : 'Load More'}
+                </Button>
+              )}
+            </div>
+          </>
         )}
       </Section>
     </>

@@ -8,11 +8,13 @@ import { BackendlessError, NetworkError, query, quote, request } from '@/lib/bac
 
 export interface FetchPostsOptions {
   tag?: string
+  /** Number of posts to skip: the "Load More" button asks for the next page. */
+  offset?: number
   signal?: AbortSignal
 }
 
-/** Newest first, first page only; `content` is left out to keep the list light. */
-export async function fetchPosts({ tag, signal }: FetchPostsOptions = {}): Promise<BlogPost[]> {
+/** Newest first, one page (PAGE_SIZE) at a time; `content` is left out to keep the list light. */
+export async function fetchPosts({ tag, offset = 0, signal }: FetchPostsOptions = {}): Promise<BlogPost[]> {
   // The tag comes from the URL: anything outside the tag alphabet (which has no LIKE
   // wildcards and no quotes) cannot match a real tag, so answer without a request.
   if (tag !== undefined && !isValidTag(tag)) return []
@@ -20,7 +22,7 @@ export async function fetchPosts({ tag, signal }: FetchPostsOptions = {}): Promi
     ? `published=true AND tags LIKE ${quote(`%,${tag},%`)}`
     : 'published=true'
   const rows = await request<BlogRow[]>(
-    `/data/Blog${query({ where, sortBy: 'created desc', pageSize: PAGE_SIZE, props: LIST_PROPS })}`,
+    `/data/Blog${query({ where, sortBy: 'created desc', pageSize: PAGE_SIZE, offset: offset || undefined, props: LIST_PROPS })}`,
     { signal, withAuth: false },
   )
   return rows.filter((row) => row.slug && row.title).map(toPost)
