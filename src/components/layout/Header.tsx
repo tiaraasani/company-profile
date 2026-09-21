@@ -1,4 +1,4 @@
-import { LogOut, Menu, X } from 'lucide-react'
+import { LogOut, Menu, PenLine, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { Logo } from './Logo'
@@ -20,7 +20,11 @@ function navLinkClass(isActive: boolean, variant: 'desktop' | 'mobile') {
   )
 }
 
-/** Sign-in / sign-out controls; a fixed-width placeholder while a stored session is checked. */
+/**
+ * Sign-in / sign-out controls. Signed-in users also get the shortcut to the editor here;
+ * everyone else finds "Write a post" on the Insights page, in the footer and in the mobile
+ * menu. A fixed-width placeholder holds the space while a stored session is checked.
+ */
 function AuthSlot({ variant }: { variant: 'desktop' | 'mobile' }) {
   const { status, user, logout } = useAuth()
 
@@ -37,6 +41,10 @@ function AuthSlot({ variant }: { variant: 'desktop' | 'mobile' }) {
     return (
       <div className={cn('flex items-center gap-2', variant === 'mobile' && 'justify-between px-4 py-2')}>
         <span className="truncate text-sm text-muted-foreground">Hi, {user.name}</span>
+        <Link to="/blog/new" className={cn(buttonVariants({ variant: 'ghost' }), 'h-11 px-3')}>
+          <PenLine aria-hidden="true" className="size-4" />
+          Write a post
+        </Link>
         <Button
           type="button"
           variant="outline"
@@ -114,7 +122,6 @@ export function Header() {
               <li key={route.path}>
                 <NavLink
                   to={route.path}
-                  end={route.path === '/'}
                   className={({ isActive }) => navLinkClass(isActive, 'desktop')}
                 >
                   {route.label}
@@ -125,7 +132,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <div className="hidden sm:block">
+          <div className="hidden lg:block">
             <AuthSlot variant="desktop" />
           </div>
           <ThemeToggle />
@@ -157,11 +164,15 @@ export function Header() {
         className="absolute inset-x-0 top-full border-b bg-background shadow-lg lg:hidden"
       >
         <ul className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3 md:px-6">
+          <li>
+            <NavLink to="/" end onClick={close} className={({ isActive }) => navLinkClass(isActive, 'mobile')}>
+              Home
+            </NavLink>
+          </li>
           {navRoutes.map((route) => (
             <li key={route.path}>
               <NavLink
                 to={route.path}
-                end={route.path === '/'}
                 onClick={close}
                 className={({ isActive }) => navLinkClass(isActive, 'mobile')}
               >
@@ -169,7 +180,16 @@ export function Header() {
               </NavLink>
             </li>
           ))}
-          <li className="sm:hidden">
+          <li>
+            <NavLink
+              to="/blog/new"
+              onClick={close}
+              className={({ isActive }) => navLinkClass(isActive, 'mobile')}
+            >
+              Write a post
+            </NavLink>
+          </li>
+          <li className="border-t pt-1">
             <AuthSlot variant="mobile" />
           </li>
         </ul>

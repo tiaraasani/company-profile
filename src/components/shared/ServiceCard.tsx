@@ -11,6 +11,7 @@ import {
 import type { Service } from '@/data/services'
 import { icons } from '@/lib/icons'
 
+/** One pillar with its four service names, as on the original home page. */
 export function ServiceCard({ service }: { service: Service }) {
   const Icon = icons[service.icon]
 
@@ -27,10 +28,10 @@ export function ServiceCard({ service }: { service: Service }) {
       </CardHeader>
       <CardContent>
         <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-          {service.features.slice(0, 3).map((feature) => (
-            <li key={feature} className="flex gap-2">
+          {service.offerings.map((offering) => (
+            <li key={offering.name} className="flex gap-2">
               <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-              {feature}
+              {offering.name}
             </li>
           ))}
         </ul>

@@ -6,7 +6,7 @@ import { CtaBand } from '@/components/shared/CtaBand'
 import { ServiceCard } from '@/components/shared/ServiceCard'
 import { TestimonialCarousel } from '@/components/shared/TestimonialCarousel'
 import { buttonVariants } from '@/components/ui/button'
-import { industries, values } from '@/data/about'
+import { values } from '@/data/about'
 import { company } from '@/data/company'
 import { findRoute } from '@/data/routes'
 import { services } from '@/data/services'
@@ -17,7 +17,11 @@ import { cn } from '@/lib/utils'
 
 const meta = findRoute('/')!
 
-/** Eagerly imported: this page carries the LCP for the most visited URL. */
+/**
+ * Follows the order of suitmedia.com's home page (hero with figures, the four pillars, the
+ * closing call to action), with the company overview and testimonials the brief requires
+ * in between. Eagerly imported: this page carries the LCP for the most visited URL.
+ */
 export default function HomePage() {
   useSeo(meta.title, meta.description, meta.path)
 
@@ -38,24 +42,23 @@ export default function HomePage() {
             <p className="max-w-xl text-lg text-muted-foreground md:text-xl">
               {company.shortDescription}
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div>
               <Link
                 to="/services"
                 className={cn(buttonVariants({ size: 'lg' }), 'h-11 px-6 text-base')}
               >
-                Explore our services
+                Explore Our Solutions
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
-              <Link
-                to="/about"
-                className={cn(
-                  buttonVariants({ variant: 'outline', size: 'lg' }),
-                  'h-11 px-6 text-base',
-                )}
-              >
-                About the company
-              </Link>
             </div>
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-t pt-6 sm:grid-cols-4">
+              {company.stats.map((stat) => (
+                <div key={stat.label} className="flex flex-col">
+                  <dt className="order-2 text-sm text-muted-foreground">{stat.label}</dt>
+                  <dd className="order-1 text-3xl font-bold tracking-tight">{stat.value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
           <img
             src="/images/hero-home-1024.webp"
@@ -71,23 +74,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Section labelledBy="stats-heading" className="border-b py-10 md:py-12">
-        <h2 id="stats-heading" className="sr-only">
-          Company in numbers
-        </h2>
-        <dl className="grid grid-cols-2 gap-6 lg:grid-cols-4">
-          {company.stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col gap-1">
-              <dt className="order-2 text-sm text-muted-foreground">{stat.label}</dt>
-              <dd className="order-1 text-3xl font-bold tracking-tight md:text-4xl">
-                {stat.value}
-              </dd>
-            </div>
+      <Section labelledBy="solutions-heading">
+        <SectionHeading
+          id="solutions-heading"
+          eyebrow="Expertises"
+          title="Strategic Digital Solutions for Your Businesses"
+          lead="Strategy, creative, technology and communication, planned and delivered together so nothing is lost between hand-offs."
+        />
+        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service) => (
+            <li key={service.slug}>
+              <ServiceCard service={service} />
+            </li>
           ))}
-        </dl>
+        </ul>
       </Section>
 
-      <Section labelledBy="overview-heading">
+      <Section labelledBy="overview-heading" className="bg-muted/40">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <SectionHeading
             id="overview-heading"
@@ -131,46 +134,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      <Section labelledBy="services-heading" className="bg-muted/40">
-        <SectionHeading
-          id="services-heading"
-          eyebrow="Expertise"
-          title="Four disciplines, one team"
-          lead="Strategy, creative, technology and communication, planned and delivered together so nothing is lost between hand-offs."
-        />
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service) => (
-            <li key={service.slug}>
-              <ServiceCard service={service} />
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section labelledBy="industries-heading" className="py-10 md:py-12">
-        <h2
-          id="industries-heading"
-          className="text-center text-sm font-semibold tracking-wide text-muted-foreground uppercase"
-        >
-          Industries we serve
-        </h2>
-        <ul className="mt-6 flex flex-wrap justify-center gap-3">
-          {industries.map((industry) => {
-            const Icon = icons[industry.icon]
-            return (
-              <li
-                key={industry.name}
-                className="inline-flex h-11 items-center gap-2 rounded-full border bg-card px-4 text-sm font-medium"
-              >
-                <Icon aria-hidden="true" className="size-4 text-primary" />
-                {industry.name}
-              </li>
-            )
-          })}
-        </ul>
-      </Section>
-
-      <Section labelledBy="testimonials-heading" className="bg-muted/40">
+      <Section labelledBy="testimonials-heading">
         <SectionHeading
           id="testimonials-heading"
           eyebrow="Testimonials"

@@ -1,5 +1,11 @@
 import type { IconName } from '@/lib/icons'
 
+export interface ServiceOffering {
+  /** Service name as listed on suitmedia.com/services. */
+  name: string
+  description: string
+}
+
 export interface ServicePricing {
   /** Engagement model shown on the pricing card. */
   model: string
@@ -21,25 +27,45 @@ export interface Service {
   tagline: string
   description: string
   icon: IconName
-  features: string[]
+  /** The four named services under this pillar, as on the original site. */
+  offerings: ServiceOffering[]
   pricing: ServicePricing
   testimonial: ServiceTestimonial
 }
 
-/** Service lines adapted from suitmedia.com ("Expertises"). Pricing is illustrative. */
+/**
+ * The four pillars and their sixteen services follow suitmedia.com ("Expertises");
+ * descriptions are rewritten, pricing and testimonials are illustrative.
+ */
 export const services: Service[] = [
   {
     slug: 'strategy',
     title: 'Strategy',
     tagline: 'Decide with evidence, then execute with focus.',
     description:
-      'Digital and IT advisory, UX and market research, and performance monitoring that turn business goals into a clear, measurable digital roadmap.',
+      'Digital advisory, customer research and analytics that turn business goals into a clear, measurable roadmap before anything gets built.',
     icon: 'compass',
-    features: [
-      'Digital and IT advisory',
-      'UX research and market research',
-      'Digital roadmap and product discovery',
-      'Performance monitoring and analytics',
+    offerings: [
+      {
+        name: 'Digital Transformation Strategy',
+        description:
+          'Align technology investments with core business objectives so growth and efficiency move together.',
+      },
+      {
+        name: 'Customer Experience Strategy',
+        description:
+          'Map and personalise customer journeys that turn first-time buyers into loyal advocates.',
+      },
+      {
+        name: 'IT Strategy and Governance',
+        description:
+          'Give innovation a secure, well-governed IT foundation to run on.',
+      },
+      {
+        name: 'Strategic Data Analytics',
+        description:
+          'Turn the data you already collect into insights that reveal opportunities and sharpen decisions.',
+      },
     ],
     pricing: {
       model: 'Discovery sprint',
@@ -56,15 +82,31 @@ export const services: Service[] = [
   {
     slug: 'creative',
     title: 'Creative',
-    tagline: 'Brands and interfaces people remember.',
+    tagline: 'Brands and experiences people remember.',
     description:
-      'Brand development, UI/UX design, content creation and videography, crafted by designers who work side by side with engineers.',
+      'Brand building, experience design, content and visual storytelling, crafted by designers who work side by side with engineers.',
     icon: 'palette',
-    features: [
-      'Brand identity and guidelines',
-      'UI/UX design and prototyping',
-      'Content creation and copywriting',
-      'Videography and motion',
+    offerings: [
+      {
+        name: 'Brand Equity Management',
+        description:
+          'Build long-term brand value with initiatives that keep the brand consistent, relevant and ahead of the market.',
+      },
+      {
+        name: 'Digital Experience Design',
+        description:
+          'Design websites and apps that people enjoy using and that convert.',
+      },
+      {
+        name: 'Strategic Content Marketing',
+        description:
+          'Plan and produce content that holds attention and moves the business forward.',
+      },
+      {
+        name: 'Visual Storytelling',
+        description:
+          "Tell the brand's story through photography, video and motion that connect emotionally.",
+      },
     ],
     pricing: {
       model: 'Design engagement',
@@ -83,13 +125,29 @@ export const services: Service[] = [
     title: 'Technology',
     tagline: 'Web, mobile and commerce platforms built to scale.',
     description:
-      'iOS and Android development, web development, e-commerce solutions and SEO, delivered with the engineering discipline of a 17-year-old agency.',
+      'Mobile and web development, digital commerce and search optimisation, delivered with the engineering discipline of a 17-year-old agency.',
     icon: 'code',
-    features: [
-      'iOS and Android apps',
-      'Web applications and portals',
-      'E-commerce platforms and integrations',
-      'Technical SEO and site performance',
+    offerings: [
+      {
+        name: 'Mobile Application Development',
+        description:
+          'Reach customers on iOS and Android with apps that are fast, stable and easy to grow.',
+      },
+      {
+        name: 'Web Application Development',
+        description:
+          'Custom web platforms and portals that streamline how the business operates.',
+      },
+      {
+        name: 'Digital Commerce Solutions',
+        description:
+          'E-commerce platforms tailored to how you sell, from catalogue to checkout to fulfilment.',
+      },
+      {
+        name: 'Search Engine Optimization',
+        description:
+          'Grow organic visibility and qualified leads through technical and content SEO.',
+      },
     ],
     pricing: {
       model: 'Build and run',
@@ -108,13 +166,29 @@ export const services: Service[] = [
     title: 'Communication',
     tagline: 'Campaigns that reach the right audience.',
     description:
-      'Creative campaigns, social media management, digital advertising and influencer marketing, planned and measured as one programme.',
+      'Integrated campaigns, paid media, social and influencer marketing, planned and measured as one programme.',
     icon: 'megaphone',
-    features: [
-      'Creative campaign concepts',
-      'Social media management',
-      'Digital advertising and media buying',
-      'Influencer and community marketing',
+    offerings: [
+      {
+        name: 'Integrated Marketing Campaigns',
+        description:
+          'Cohesive campaigns across channels so every touchpoint tells the same story.',
+      },
+      {
+        name: 'Digital Advertising',
+        description:
+          'Data-driven paid media that makes every rupiah of ad spend count.',
+      },
+      {
+        name: 'Social Media Management',
+        description:
+          'Everyday presence that builds meaningful connections and lasting loyalty.',
+      },
+      {
+        name: 'Influencer Marketing',
+        description:
+          "Partnerships with trusted voices that amplify the brand's message.",
+      },
     ],
     pricing: {
       model: 'Monthly retainer',

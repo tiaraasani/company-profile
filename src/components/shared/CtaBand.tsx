@@ -7,12 +7,17 @@ import { cn } from '@/lib/utils'
 interface CtaBandProps {
   title?: string
   lead?: string
+  /** Secondary link; defaults to the services page. */
+  secondaryTo?: string
+  secondaryLabel?: string
 }
 
-/** Closing call to action used on the marketing pages. */
+/** Closing call to action used on the marketing pages, worded like the original site. */
 export function CtaBand({
-  title = "Let's build what's next for your business",
+  title = "Ready to Transform Your Digital Presence? Let's Talk.",
   lead = 'Tell us about your goals and we will come back with a plan, a team and a timeline.',
+  secondaryTo = '/services',
+  secondaryLabel = 'Explore Our Solutions',
 }: CtaBandProps) {
   return (
     <section aria-labelledby="cta-heading" className="bg-primary text-primary-foreground">
@@ -29,16 +34,16 @@ export function CtaBand({
             className={cn(buttonVariants({ variant: 'secondary', size: 'lg' }), 'h-11 px-6 text-base')}
           >
             <Mail aria-hidden="true" className="size-4" />
-            Email us
+            Get a Free Consultation
           </a>
           <Link
-            to="/services"
+            to={secondaryTo}
             className={cn(
               buttonVariants({ variant: 'outline', size: 'lg' }),
               'h-11 border-primary-foreground/40 bg-transparent px-6 text-base text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground',
             )}
           >
-            See services
+            {secondaryLabel}
             <ArrowRight aria-hidden="true" className="size-4" />
           </Link>
         </div>

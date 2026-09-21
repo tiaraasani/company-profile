@@ -1,4 +1,4 @@
-import { Check, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { PageHero } from '@/components/layout/PageHero'
@@ -22,6 +22,11 @@ import { cn } from '@/lib/utils'
 
 const meta = findRoute('/services')!
 
+/**
+ * "Expertises": the four pillars with their four named services each, as on
+ * suitmedia.com/services, plus the engagement model and a client quote per pillar that
+ * the brief asks for.
+ */
 export default function ServicesPage() {
   useSeo(meta.title, meta.description, meta.path)
   const { hash } = useLocation()
@@ -35,12 +40,12 @@ export default function ServicesPage() {
   return (
     <>
       <PageHero
-        eyebrow="Services"
-        title="What we do"
-        lead="Strategy, creative, technology and communication, delivered end to end by one team."
+        eyebrow="Expertises"
+        title="Digital Innovation Powered by Valuable Services"
+        lead="Strategy, creative, technology and communication: innovation backed by services that add value at every step of your digital transformation."
       />
 
-      <nav aria-label="Services on this page" className="border-b bg-card">
+      <nav aria-label="Expertises on this page" className="border-b bg-card">
         <ul className="mx-auto flex max-w-7xl flex-wrap gap-2 px-4 py-4 md:px-6">
           {services.map((service) => (
             <li key={service.slug}>
@@ -64,12 +69,12 @@ export default function ServicesPage() {
             labelledBy={`${service.slug}-heading`}
             className="border-b"
           >
-            <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
-              <div className="flex flex-col gap-6">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                  <Icon aria-hidden="true" className="size-6" />
-                </div>
-                <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-10">
+              <div className="grid gap-6 lg:grid-cols-[1fr_2fr] lg:gap-16">
+                <div className="flex flex-col gap-4">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                    <Icon aria-hidden="true" className="size-6" />
+                  </div>
                   <h2
                     id={`${service.slug}-heading`}
                     className="text-3xl font-bold tracking-tight md:text-4xl"
@@ -79,20 +84,25 @@ export default function ServicesPage() {
                   <p className="text-lg text-primary">{service.tagline}</p>
                   <p className="leading-relaxed text-muted-foreground">{service.description}</p>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold">What is included</h3>
-                  <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {service.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-muted-foreground">
-                        <Check aria-hidden="true" className="mt-1 size-4 shrink-0 text-primary" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <ul className="grid gap-4 sm:grid-cols-2">
+                  {service.offerings.map((offering) => (
+                    <li key={offering.name}>
+                      <Card className="h-full">
+                        <CardHeader>
+                          <CardTitle>
+                            <h3 className="text-lg font-semibold">{offering.name}</h3>
+                          </CardTitle>
+                          <CardDescription className="leading-relaxed">
+                            {offering.description}
+                          </CardDescription>
+                        </CardHeader>
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="flex flex-col gap-6">
+              <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
                     <CardDescription>Indicative pricing</CardDescription>
@@ -115,7 +125,7 @@ export default function ServicesPage() {
                   </CardFooter>
                 </Card>
 
-                <figure className="rounded-xl bg-muted/60 p-6">
+                <figure className="flex flex-col justify-between rounded-xl bg-muted/60 p-6">
                   <blockquote className="leading-relaxed">
                     <p>&ldquo;{service.testimonial.quote}&rdquo;</p>
                   </blockquote>
@@ -135,7 +145,7 @@ export default function ServicesPage() {
         redesign exercise.
       </p>
 
-      <CtaBand />
+      <CtaBand secondaryTo="/blog" secondaryLabel="View All Articles" />
     </>
   )
 }
