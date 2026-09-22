@@ -17,7 +17,7 @@ export function TeamCard({ member }: { member: TeamMember }) {
     <Card className="h-full">
       <CardHeader className="items-center text-center">
         {/* randomuser portraits are 128px; shown at 96px so they stay sharp on 1x and 2x screens. */}
-        <Avatar className="mb-3 size-24 self-center ring-4 ring-background">
+        <Avatar className="mb-3 size-24 justify-self-center ring-4 ring-background">
           <AvatarImage
             src={member.photo}
             alt=""

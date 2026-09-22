@@ -15,7 +15,7 @@ randomuser.me, a blog with login) are kept. Student project, not affiliated with
 | `/work` | Work (case studies) | static, 12 case studies | yes | public |
 | `/blog` | Insights (Articles) | Backendless `Blog`, "Load More" pages | yes, revalidated on load | public |
 | `/blog/<slug>` | Article (Markdown) | Backendless `Blog` | yes for posts that exist at build time, client-rendered otherwise | public |
-| `/about` | About | static | yes | public |
+| `/about` | About | static + first 4 people from randomuser.me (shared with `/teams`) | yes (skeleton for the team preview) | public |
 | `/teams` | Team | randomuser.me (seeded, cached in sessionStorage) | yes (skeleton) | public |
 | `/contact` | Contact | `POST /data/Inquiries` | yes | public |
 | `/blog/new` | Write a post | `POST /data/Blog` | no | **login required** |
@@ -218,7 +218,8 @@ Local Lighthouse 13 (`npm run preview`, Chrome headless, mobile / desktop):
 
 ## Deploy (Vercel)
 
-1. Import the repo, set **Root Directory** to `company-profile` (framework preset Vite).
+1. Import the `company-profile` repo (framework preset Vite) and leave **Root Directory**
+   empty: the app lives at the repo root.
 2. Environment variables: `VITE_BACKENDLESS_API_URL`, `VITE_SITE_URL=https://<project>.vercel.app`.
 3. `vercel.json` already rewrites unknown URLs to `/app.html` and sets long cache headers for `/assets`, `/fonts`, `/images`.
 4. Measure on the production alias (preview deployments inject the Vercel toolbar and `noindex`).

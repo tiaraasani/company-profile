@@ -84,7 +84,10 @@ function subscribeTo(key: string, listener: () => void) {
 export interface UseResourceOptions {
   /** Persist successful results in sessionStorage under the key. */
   cache?: boolean
-  /** Re-fetch primed (build-time) data after hydration so edits made since the build show up. */
+  /**
+   * Re-fetch on every mount, keeping the current data (build-time or from an earlier visit)
+   * on screen meanwhile, so posts published since then show up without a full reload.
+   */
   revalidate?: boolean
 }
 
@@ -113,7 +116,7 @@ export function useResource<T>(
 
   useEffect(() => {
     const current = getEntry<T>(key, cache)
-    const stale = revalidate && primed.has(key)
+    const stale = revalidate && current.status === 'success'
     if (current.status !== 'loading' && !stale) return
 
     const controller = new AbortController()

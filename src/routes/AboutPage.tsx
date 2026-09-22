@@ -9,6 +9,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { approach, faq, journey, values } from '@/data/about'
 import { company } from '@/data/company'
 import { findRoute } from '@/data/routes'
+import { TeamGrid } from '@/features/team/TeamGrid'
 import { useSeo } from '@/hooks/useSeo'
 import { icons } from '@/lib/icons'
 import { cn } from '@/lib/utils'
@@ -17,7 +18,8 @@ const meta = findRoute('/about')!
 
 /**
  * Same section order as suitmedia.com/about: values, approach, journey, FAQ, team, call to
- * action and careers. The team section doubles as the culture description the brief asks for.
+ * action and careers. The team section carries the culture description the brief asks for
+ * and previews the first four people from the Teams page (randomuser.me).
  */
 export default function AboutPage() {
   useSeo(meta.title, meta.description, meta.path)
@@ -163,19 +165,33 @@ export default function AboutPage() {
               changed. The same people stay with a client from discovery through launch and
               the releases that follow, and every office shares the same way of working.
             </p>
+            {/* Term before description, as <dl> requires; the figure is shown first via order. */}
             <dl className="grid grid-cols-2 gap-4">
               {company.stats.slice(2).map((stat) => (
-                <div key={stat.label} className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
-                  <dd className="text-2xl font-bold tracking-tight">{stat.value}</dd>
-                  <dt className="text-sm text-muted-foreground">{stat.label}</dt>
+                <div
+                  key={stat.label}
+                  className="flex flex-col rounded-xl bg-card p-4 ring-1 ring-foreground/10"
+                >
+                  <dt className="order-2 text-sm text-muted-foreground">{stat.label}</dt>
+                  <dd className="order-1 text-2xl font-bold tracking-tight">{stat.value}</dd>
                 </div>
               ))}
             </dl>
-            <Link to="/teams" className={cn(buttonVariants(), 'h-11 self-start px-5')}>
-              Meet Our People
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
           </div>
+        </div>
+
+        <div className="mt-10 md:mt-14">
+          <TeamGrid limit={4} />
+        </div>
+        <div className="mt-8 flex flex-col items-center gap-4 text-center">
+          <Link to="/teams" className={cn(buttonVariants(), 'h-11 px-5')}>
+            Meet Our People
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </Link>
+          <p className="text-xs text-muted-foreground">
+            Profiles are generated from randomuser.me for this exercise; names and photos are
+            not real Suitmedia staff.
+          </p>
         </div>
       </Section>
 

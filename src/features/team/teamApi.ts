@@ -18,8 +18,10 @@ interface RandomUser {
   location: { city: string; country: string }
 }
 
-const ENDPOINT =
-  'https://randomuser.me/api/1.4/?results=8&seed=suitmedia-team&nat=us,gb,ca,au,nz,ie&inc=login,name,picture,location&noinfo'
+/** People per load: the Teams page shows them all, About the first few. */
+export const TEAM_SIZE = 8
+
+const ENDPOINT = `https://randomuser.me/api/1.4/?results=${TEAM_SIZE}&seed=suitmedia-team&nat=us,gb,ca,au,nz,ie&inc=login,name,picture,location&noinfo`
 
 const ROLES = [
   'Chief Executive Officer',

@@ -1,10 +1,13 @@
 import { TeamCard } from './TeamCard'
-import { fetchTeam, TEAM_CACHE_KEY } from './teamApi'
+import { fetchTeam, TEAM_CACHE_KEY, TEAM_SIZE } from './teamApi'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResource } from '@/lib/resource'
 
-const PLACEHOLDER_COUNT = 8
+interface TeamGridProps {
+  /** Show only the first members; the About page previews the team this way. */
+  limit?: number
+}
 
 /** Skeleton card with the same footprint as TeamCard so the grid does not shift. */
 function TeamCardSkeleton() {
@@ -20,7 +23,7 @@ function TeamCardSkeleton() {
   )
 }
 
-export function TeamGrid() {
+export function TeamGrid({ limit = TEAM_SIZE }: TeamGridProps) {
   const team = useResource(TEAM_CACHE_KEY, fetchTeam, { cache: true })
 
   if (team.status === 'error') {
@@ -40,12 +43,12 @@ export function TeamGrid() {
       {loading && <output className="sr-only">Loading team members</output>}
       <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {loading
-          ? Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
+          ? Array.from({ length: limit }, (_, index) => (
               <li key={index} aria-hidden="true">
                 <TeamCardSkeleton />
               </li>
             ))
-          : team.data?.map((member) => (
+          : team.data?.slice(0, limit).map((member) => (
               <li key={member.id}>
                 <TeamCard member={member} />
               </li>
