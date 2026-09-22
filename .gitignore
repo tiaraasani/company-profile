@@ -1,24 +1,31 @@
-# Logs
-logs
+# dependencies / build output
+node_modules/
+dist/
+dist-ssr/
+dist-check/
+
+# environment files (keep the examples)
+.env
+.env.*
+!.env.example
+
+# deploy / audit artifacts
+.vercel/
+lighthouse/
+
+# original photos fed to `npm run optimize-images` (the optimized WebP files are committed)
+raw-images/
+
+# logs & OS files
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.DS_Store
+Thumbs.db
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# editor
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.idea/
+
+# Claude Code local settings
+.claude/settings.local.json
