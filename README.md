@@ -55,12 +55,9 @@ VITE_SITE_URL=                          # production URL; enables canonical/og:u
 
 ## Reviewer account
 
-| | |
-|---|---|
-| Email | `demo@example.com` |
-| Password | `Suitmedia123!` |
-
-The login page has a "Fill in the reviewer account" button. Suggested walk-through:
+Registration is disabled, so a reviewer account exists in the Backendless `Users` table.
+Its credentials are shared privately with the submission; they are not stored in this repo
+or shown on the site. Suggested walk-through:
 
 1. Signed out, open **Write a post** in the header → redirected to `/login`.
 2. Wrong password → inline alert ("Incorrect email or password") and focus moves to it.
@@ -134,12 +131,11 @@ Also in the console:
   `content` TEXT, `slug` STRING(80) with validator `^[a-z0-9]+(-[a-z0-9]+)*$` and
   **Unique**, `tags` with validator `^(,[a-z0-9-]{2,20}){0,5},?$`.
 
-Verify from PowerShell (the reviewer account is public, so its token proves nothing
-beyond "login works"):
+Verify from PowerShell (fill in the reviewer credentials you were given):
 
 ```powershell
 $base = 'https://<subdomain>.backendless.app/api'
-curl.exe -s -o NUL -w '%{http_code}' -X POST "$base/users/login" -H 'Content-Type: application/json' -d '{\"login\":\"demo@example.com\",\"password\":\"Suitmedia123!\"}'   # 200
+curl.exe -s -o NUL -w '%{http_code}' -X POST "$base/users/login" -H 'Content-Type: application/json' -d '{\"login\":\"<email>\",\"password\":\"<password>\"}'   # 200
 curl.exe -s -o NUL -w '%{http_code}' "$base/data/Users"                                                     # 403
 curl.exe -s -o NUL -w '%{http_code}' -X POST "$base/data/Blog" -H 'Content-Type: application/json' -d '{\"title\":\"x\"}'   # 403 (no token)
 curl.exe -s -o NUL -w '%{http_code}' -X POST "$base/users/register" -H 'Content-Type: application/json' -d '{\"email\":\"a@b.co\",\"password\":\"x\"}'   # not 200
@@ -168,9 +164,9 @@ curl.exe -s "$base/data/Blog?where=published%3Dtrue&pageSize=1"                 
 - **Build-time data**: `scripts/prerender.mjs` only prerenders posts whose slug matches
   `SLUG_PATTERN`, escapes the slug before writing it into HTML, and refuses to write
   outside `dist/`, so a malicious row cannot alter other pages during the build.
-- **Reviewer account**: the credentials are intentionally public for grading. After grading,
-  change the password in the console, delete `src/features/auth/demoAccount.ts`, and remove
-  the two places that use it (`LoginPage.tsx`, `LoginForm.tsx`) plus the table above.
+- **Reviewer account**: its credentials are shared privately and never committed or rendered.
+  Registration is disabled in the Backendless console and repeated failed logins lock the
+  account for ten minutes, so the login form cannot be used to enumerate or brute-force users.
 - **Session**: the Backendless token is kept in localStorage (`cp:auth`) and sent only to the
   configured API URL; `GET /users/logout` invalidates it server-side and the blog draft is
   cleared on logout.

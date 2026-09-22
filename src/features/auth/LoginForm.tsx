@@ -4,7 +4,6 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useAuth } from './auth'
 import { messageForLoginError } from './authApi'
-import { demoAccount } from './demoAccount'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -75,6 +74,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                 type="email"
                 inputMode="email"
                 autoComplete="email"
+                placeholder="you@company.com"
                 aria-required="true"
                 aria-invalid={fieldState.invalid}
                 aria-describedby={fieldState.invalid ? `${ids.email}-error` : undefined}
@@ -99,6 +99,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                   id={ids.password}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
+                  placeholder="Enter your password"
                   aria-required="true"
                   aria-invalid={fieldState.invalid}
                   aria-describedby={fieldState.invalid ? `${ids.password}-error` : undefined}
@@ -128,7 +129,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         />
       </FieldGroup>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div>
         <Button type="submit" className="h-11 px-6 text-base" disabled={isSubmitting} aria-busy={isSubmitting}>
           {isSubmitting ? (
             <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
@@ -136,17 +137,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             <LogIn aria-hidden="true" className="size-4" />
           )}
           {isSubmitting ? 'Signing in' : 'Log in'}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-11 px-4"
-          onClick={() => {
-            setError(null)
-            form.reset({ email: demoAccount.email, password: demoAccount.password })
-          }}
-        >
-          Fill in the reviewer account
         </Button>
       </div>
     </form>

@@ -1,15 +1,22 @@
+import { Check } from 'lucide-react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
-import { PageHero } from '@/components/layout/PageHero'
-import { Section } from '@/components/layout/Section'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { findRoute } from '@/data/routes'
 import { useAuth } from '@/features/auth/auth'
-import { demoAccount } from '@/features/auth/demoAccount'
 import { LoginForm } from '@/features/auth/LoginForm'
 import { useSeo } from '@/hooks/useSeo'
 
 const meta = findRoute('/login')!
 
+const perks = [
+  'Markdown editor with a live preview',
+  'Drafts kept in this browser until you publish',
+  'Published posts appear on Insights right away',
+]
+
+/**
+ * Split sign-in screen: a brand panel and the form side by side, filling the viewport
+ * below the header so the footer only follows on scroll. The panels stack on small screens.
+ */
 export default function LoginPage() {
   useSeo(meta.title, meta.description, meta.path)
   const { status } = useAuth()
@@ -22,49 +29,48 @@ export default function LoginPage() {
   }
 
   return (
-    <>
-      <PageHero eyebrow="Account" title="Log in" lead="Sign in to write and manage blog posts." />
-
-      <Section labelledBy="login-heading">
-        <h2 id="login-heading" className="sr-only">
-          Sign in
-        </h2>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,28rem)_1fr] lg:gap-16">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <h3 className="text-xl font-semibold">Welcome back</h3>
-              </CardTitle>
-              <CardDescription>
-                Accounts live in the Backendless <code>Users</code> table for this project.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LoginForm onSuccess={() => navigate(from, { replace: true })} />
-            </CardContent>
-          </Card>
-
-          <aside aria-labelledby="reviewer-heading" className="flex flex-col gap-3 text-sm text-muted-foreground">
-            <h3 id="reviewer-heading" className="text-base font-semibold text-foreground">
-              Reviewing this project?
-            </h3>
-            <p>
-              A demo account exists so the protected <strong>Write a post</strong> page can be
-              tried without registering. The button under the form fills it in.
-            </p>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-lg bg-muted p-4 font-mono text-xs">
-              <dt className="text-muted-foreground">email</dt>
-              <dd className="text-foreground">{demoAccount.email}</dd>
-              <dt className="text-muted-foreground">password</dt>
-              <dd className="text-foreground">{demoAccount.password}</dd>
-            </dl>
-            <p>
-              After signing in you are sent back to the page you came from; the session is kept
-              in localStorage and validated with Backendless on every reload.
-            </p>
-          </aside>
+    <div className="grid lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-2">
+      <section
+        aria-labelledby="page-title"
+        className="flex items-center bg-primary text-primary-foreground"
+      >
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-4 py-12 md:px-6 lg:px-12 lg:py-20">
+          <p className="text-sm font-semibold tracking-wide uppercase">Account</p>
+          <h1
+            id="page-title"
+            className="text-4xl font-bold tracking-tight text-balance md:text-5xl"
+          >
+            Write for the Suitmedia blog
+          </h1>
+          <p className="text-lg">
+            Sign in to publish articles on Insights and keep your drafts safe while you write.
+          </p>
+          <ul className="flex flex-col gap-3">
+            {perks.map((perk) => (
+              <li key={perk} className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
+                  <Check aria-hidden="true" className="size-3.5" />
+                </span>
+                {perk}
+              </li>
+            ))}
+          </ul>
         </div>
-      </Section>
-    </>
+      </section>
+
+      <section aria-labelledby="login-heading" className="flex items-center">
+        <div className="mx-auto w-full max-w-md px-4 py-12 md:px-6 lg:py-20">
+          <h2 id="login-heading" className="text-2xl font-semibold tracking-tight">
+            Log in
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            There is no public sign-up: accounts are issued by the site owner.
+          </p>
+          <div className="mt-8">
+            <LoginForm onSuccess={() => navigate(from, { replace: true })} />
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }
